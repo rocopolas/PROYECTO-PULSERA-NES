@@ -51,7 +51,15 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/0.0.11/push.min.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+        });
+        
+
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
@@ -64,6 +72,21 @@ $conn->close();
                     } else {
                         const estado = response.estado_boton == 1 ? 'Encendido' : 'Apagado';
                         $('#estado-boton').text('Estado del botón: ' + estado);
+                        if(response.estado_boton == 1) {
+                            console.log('El botón está encendido');
+                            if (Notification.permission === "granted") {
+                                Push.create("El botón está encendido", {
+                                    body: "El botón ha sido encendido.",
+                                    timeout: 4000,
+                                    onClick: function () {
+                                        window.focus();
+                                        this.close();
+                                    }
+                                });
+                            } else {
+                                console.log('Permiso de notificación no concedido');
+                            }
+                        } 
                     }
                 },
                 error: function() {
