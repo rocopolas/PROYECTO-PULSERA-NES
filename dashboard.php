@@ -43,13 +43,7 @@ if ($result_usuario->num_rows > 0) {
     <title>Dashboard</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-        });
         
-
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
