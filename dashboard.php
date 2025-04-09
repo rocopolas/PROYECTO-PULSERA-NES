@@ -8,40 +8,31 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Conexión a la base de datos
-$conn = new mysqli('localhost', 'root', '', 'usuarios');
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+$conexion = new mysqli("localhost", "root", "", "usuarios");
+
+if ($conexion->connect_error) {
+    die("Error de conexión: " . $conexion->connect_error);
 }
 
-$mensaje = ""; // Variable para mostrar mensajes
-$username = $_SESSION['username']; // Usuario autenticado
+// Obtener el id del usuario logueado (puedes ajustar esto según tu estructura de sesión)
+$username = $_SESSION['username'];
+$query_usuario = "SELECT id FROM usuarios2 WHERE username = '$username'";
+$result_usuario = $conexion->query($query_usuario);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        $action = $_POST['action'];
+if ($result_usuario->num_rows > 0) {
+    $row_usuario = $result_usuario->fetch_assoc();
+    $id_usuario = $row_usuario['id'];
 
-        // Procesar la acción recibida
-        if ($action === 'encender') {
-            // Actualizar estado_boton a 1 (activado) para el usuario autenticado
-            $stmt = $conn->prepare("UPDATE usuarios2 SET estado_boton = 1 WHERE username = ?");
-            $stmt->bind_param("s", $username);
-            $stmt->execute();
-            $mensaje = "El botón fue encendido.";
-        } elseif ($action === 'apagar') {
-            // Actualizar estado_boton a 0 (desactivado) para el usuario autenticado
-            $stmt = $conn->prepare("UPDATE usuarios2 SET estado_boton = 0 WHERE username = ?");
-            $stmt->bind_param("s", $username);
-            $stmt->execute();
-            $mensaje = "El botón fue apagado.";
-        } else {
-            $mensaje = "Acción desconocida.";
-        }
-
-        $stmt->close();
-    }
+    // Obtener los registros del usuario desde la tabla registro_botones
+    $query_registros = "SELECT id_evento, timestamp, ip_usuario, estado 
+                        FROM registro_botones 
+                        WHERE id_usuario = $id_usuario 
+                        ORDER BY timestamp DESC";
+    $result_registros = $conexion->query($query_registros);
+} else {
+    $id_usuario = null;
+    $result_registros = null;
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +42,6 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/0.0.11/push.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
         if (Notification.permission !== "granted") {
@@ -74,18 +64,6 @@ $conn->close();
                         $('#estado-boton').text('Estado del botón: ' + estado);
                         if(response.estado_boton == 1) {
                             console.log('El botón está encendido');
-                            if (Notification.permission === "granted") {
-                                Push.create("El botón está encendido", {
-                                    body: "El botón ha sido encendido.",
-                                    timeout: 4000,
-                                    onClick: function () {
-                                        window.focus();
-                                        this.close();
-                                    }
-                                });
-                            } else {
-                                console.log('Permiso de notificación no concedido');
-                            }
                         } 
                     }
                 },
@@ -95,8 +73,8 @@ $conn->close();
             });
         }
 
-        // Actualiza el estado cada 2 segundos
-        setInterval(actualizarEstado, 2000);
+        // Actualiza el estado cada 1 segundos
+        setInterval(actualizarEstado, 1000);
 
         // Llama a la función al cargar la página
         $(document).ready(function() {
@@ -109,12 +87,74 @@ $conn->close();
     <p>Aca veras toda la informacion de la pulsera</p>
 
     <p id="estado-boton">Cargando estado del botón...</p>
+    <h3>Historial de eventos</h3>
+    <?php
+    // Paginación
+    $eventos_por_pagina = 10;
+    $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    $offset = ($pagina_actual - 1) * $eventos_por_pagina;
 
-    <form method="POST" action="dashboard.php">
-        <button type="submit" name="action" value="encender">Encender</button>
-        <button type="submit" name="action" value="apagar">Apagar</button>
-    </form>
+    // Consulta con límite y desplazamiento
+    $query_paginada = "SELECT id_evento, timestamp, ip_usuario, estado 
+                       FROM registro_botones 
+                       WHERE id_usuario = $id_usuario 
+                       ORDER BY timestamp DESC 
+                       LIMIT $eventos_por_pagina OFFSET $offset";
+    $result_paginada = $conexion->query($query_paginada);
 
+    // Total de registros para calcular el número de páginas
+    $query_total = "SELECT COUNT(*) as total FROM registro_botones WHERE id_usuario = $id_usuario";
+    $result_total = $conexion->query($query_total);
+    $total_eventos = $result_total->fetch_assoc()['total'];
+    $total_paginas = ceil($total_eventos / $eventos_por_pagina);
+    ?>
+
+    <?php if ($result_paginada && $result_paginada->num_rows > 0): ?>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID Evento</th>
+                    <th>Fecha y Hora</th>
+                    <th>IP Usuario</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $result_paginada->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['id_evento']); ?></td>
+                        <td><?php echo htmlspecialchars($row['timestamp']); ?></td>
+                        <td><?php echo htmlspecialchars($row['ip_usuario']); ?></td>
+                        <td><?php echo htmlspecialchars($row['estado']); ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+
+        <!-- Navegación de páginas -->
+        <div>
+            <?php if ($pagina_actual > 1): ?>
+                <a href="?pagina=<?php echo $pagina_actual - 1; ?>">Anterior</a>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                <a href="?pagina=<?php echo $i; ?>" <?php if ($i == $pagina_actual) echo 'style="font-weight: bold;"'; ?>>
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+
+            <?php if ($pagina_actual < $total_paginas): ?>
+                <a href="?pagina=<?php echo $pagina_actual + 1; ?>">Siguiente</a>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        <p>No hay registros disponibles para este usuario.</p>
+    <?php endif; ?>
+    <br>
     <a href="logout.php">Cerrar sesión</a>
 </body>
 </html>
+
+<?php
+$conexion->close();
+?>

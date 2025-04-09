@@ -28,7 +28,7 @@ if ($nuevo_estado === "activo") {
 } else {
     http_response_code(400);
     echo "Estado inválido. Use 'activo' o 'suspendido'.";
-    exit();
+    exit(); 
 }
 
 // Actualizar el estado del botón en la base de datos
