@@ -41,9 +41,10 @@ if ($result_usuario->num_rows > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
@@ -76,76 +77,96 @@ if ($result_usuario->num_rows > 0) {
         });
     </script>
 </head>
-<body>
-    <h1>Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-    <p>Aca veras toda la informacion de la pulsera</p>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center">Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
+        <p class="text-center">Aca veras toda la informacion de la pulsera</p>
 
-    <p id="estado-boton">Cargando estado del botón...</p>
-    <h3>Historial de eventos</h3>
-    <?php
-    // Paginación
-    $eventos_por_pagina = 10;
-    $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-    $offset = ($pagina_actual - 1) * $eventos_por_pagina;
+        <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
+        <h3 class="mt-4">Historial de eventos</h3>
+        <?php
+        // Paginación
+        $eventos_por_pagina = 10;
+        $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        $offset = ($pagina_actual - 1) * $eventos_por_pagina;
 
-    // Consulta con límite y desplazamiento
-    $query_paginada = "SELECT id_evento, timestamp, ip_usuario, estado 
-                       FROM registro_botones 
-                       WHERE id_usuario = $id_usuario 
-                       ORDER BY timestamp DESC 
-                       LIMIT $eventos_por_pagina OFFSET $offset";
-    $result_paginada = $conexion->query($query_paginada);
+        // Consulta con límite y desplazamiento
+        $query_paginada = "SELECT id_evento, timestamp, ip_usuario, estado 
+                           FROM registro_botones 
+                           WHERE id_usuario = $id_usuario 
+                           ORDER BY timestamp DESC 
+                           LIMIT $eventos_por_pagina OFFSET $offset";
+        $result_paginada = $conexion->query($query_paginada);
 
-    // Total de registros para calcular el número de páginas
-    $query_total = "SELECT COUNT(*) as total FROM registro_botones WHERE id_usuario = $id_usuario";
-    $result_total = $conexion->query($query_total);
-    $total_eventos = $result_total->fetch_assoc()['total'];
-    $total_paginas = ceil($total_eventos / $eventos_por_pagina);
-    ?>
+        // Total de registros para calcular el número de páginas
+        $query_total = "SELECT COUNT(*) as total FROM registro_botones WHERE id_usuario = $id_usuario";
+        $result_total = $conexion->query($query_total);
+        $total_eventos = $result_total->fetch_assoc()['total'];
+        $total_paginas = ceil($total_eventos / $eventos_por_pagina);
+        ?>
 
-    <?php if ($result_paginada && $result_paginada->num_rows > 0): ?>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>ID Evento</th>
-                    <th>Fecha y Hora</th>
-                    <th>IP Usuario</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $result_paginada->fetch_assoc()): ?>
+        <?php if ($result_paginada && $result_paginada->num_rows > 0): ?>
+            <table class="table table-bordered table-striped mt-3">
+                <thead class="table-dark">
                     <tr>
-                        <td><?php echo htmlspecialchars($row['id_evento']); ?></td>
-                        <td><?php echo htmlspecialchars($row['timestamp']); ?></td>
-                        <td><?php echo htmlspecialchars($row['ip_usuario']); ?></td>
-                        <td><?php echo htmlspecialchars($row['estado']); ?></td>
+                        <th>ID Evento</th>
+                        <th>Fecha y Hora</th>
+                        <th>IP Usuario</th>
+                        <th>Estado</th>
                     </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php while ($row = $result_paginada->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['id_evento']); ?></td>
+                            <td><?php echo htmlspecialchars($row['timestamp']); ?></td>
+                            <td><?php echo htmlspecialchars($row['ip_usuario']); ?></td>
+                            <td><?php echo htmlspecialchars($row['estado']); ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
 
-        <!-- Navegación de páginas -->
-        <div>
-            <?php if ($pagina_actual > 1): ?>
-                <a href="?pagina=<?php echo $pagina_actual - 1; ?>">Anterior</a>
-            <?php endif; ?>
+            <!-- Navegación de páginas -->
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <?php
+                    // Determinar el rango de páginas a mostrar
+                    $rango_paginas = 10;
+                    $inicio_rango = floor(($pagina_actual - 1) / $rango_paginas) * $rango_paginas + 1;
+                    $fin_rango = min($inicio_rango + $rango_paginas - 1, $total_paginas);
+                    ?>
 
-            <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-                <a href="?pagina=<?php echo $i; ?>" <?php if ($i == $pagina_actual) echo 'style="font-weight: bold;"'; ?>>
-                    <?php echo $i; ?>
-                </a>
-            <?php endfor; ?>
+                    <?php if ($inicio_rango > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="?pagina=<?php echo $inicio_rango - 1; ?>">Anterior</a>
+                        </li>
+                    <?php endif; ?>
 
-            <?php if ($pagina_actual < $total_paginas): ?>
-                <a href="?pagina=<?php echo $pagina_actual + 1; ?>">Siguiente</a>
-            <?php endif; ?>
+                    <?php for ($i = $inicio_rango; $i <= $fin_rango; $i++): ?>
+                        <li class="page-item <?php if ($i == $pagina_actual) echo 'active'; ?>">
+                            <a class="page-link" href="?pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php if ($fin_rango < $total_paginas): ?>
+                        <li class="page-item">
+                            <a class="page-link" href="?pagina=<?php echo $fin_rango + 1; ?>">Siguiente</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        <?php else: ?>
+            <p class="text-center text-danger">No hay registros disponibles para este usuario.</p>
+        <?php endif; ?>
+        <br>
+        <div class="text-center mb-3">
+            <a href="logout.php" class="btn btn-danger">Cerrar sesión</a>
         </div>
-    <?php else: ?>
-        <p>No hay registros disponibles para este usuario.</p>
-    <?php endif; ?>
-    <br>
-    <a href="logout.php">Cerrar sesión</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
