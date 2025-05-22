@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 $username = $_SESSION['username']; // Usuario autenticado
 
 // Consulta el estado del botón para el usuario autenticado
-$stmt = $conn->prepare("SELECT estado_boton FROM usuarios2 WHERE username = ?");
+$stmt = $conn->prepare("SELECT estado_boton FROM users WHERE username = ?");
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
