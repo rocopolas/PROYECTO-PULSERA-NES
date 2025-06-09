@@ -12,42 +12,37 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Obtener datos del POST
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['id']) || !isset($data['nuevo_estado'])) {
+if (!isset($data['id_pulsera']) || !isset($data['nuevo_estado'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Faltan datos requeridos']);
     exit();
 }
 
 try {
-    $id = $data['id'];
+    $id_pulsera = $data['id_pulsera'];
     $nuevo_estado = strtolower($data['nuevo_estado']);
 
-    // Verificar si el usuario existe
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE id = ?");
-    $stmt->execute([$id]);
+    // Verificar si la pulsera existe
+    $stmt = $pdo->prepare("SELECT id FROM pulseras WHERE id = ?");
+    $stmt->execute([$id_pulsera]);
     if (!$stmt->fetch()) {
         http_response_code(404);
-        echo json_encode(['error' => 'Usuario no encontrado']);
+        echo json_encode(['error' => 'Pulsera no encontrada']);
         exit();
     }
 
-    // Determinar el valor de estado_boton
-    $estado_boton = ($nuevo_estado === "activo") ? 1 : 0;
-
-    if (!in_array($nuevo_estado, ['activo', 'suspendido'])) {
+    // Validar el estado
+    if (!in_array($nuevo_estado, ['encendido', 'apagado'])) {
         http_response_code(400);
-        echo json_encode(['error' => 'Estado inválido. Use "activo" o "suspendido"']);
+        echo json_encode(['error' => 'Estado inválido. Use "encendido" o "apagado"']);
         exit();
     }
 
-    // Actualizar el estado del botón
-    $stmt = $pdo->prepare("UPDATE users SET estado_boton = ? WHERE id = ?");
-    $stmt->execute([$estado_boton, $id]);
-
-    // Registrar en la tabla registro_botones
-    $ip_usuario = $_SERVER['REMOTE_ADDR'];
-    $stmt = $pdo->prepare("INSERT INTO registro_botones (id_usuario, ip_usuario, estado) VALUES (?, ?, ?)");
-    $stmt->execute([$id, $ip_usuario, $estado_boton]);
+    // Registrar en la tabla historialpulseras
+    $estado = $nuevo_estado === 'encendido' ? 'encendido' : 'apagado';
+    
+    $stmt = $pdo->prepare("INSERT INTO historialpulseras (id_pulsera, estado_pulsera) VALUES (?, ?)");
+    $stmt->execute([$id_pulsera, $estado]);
 
     echo json_encode([
         'success' => true,
@@ -69,6 +64,6 @@ try {
 
 // Ejemplos de uso:
 // Apagar:
-// curl -X POST http://localhost/webhook/webhook.php -H "Content-Type: application/json" -d "{\"id\": 1, \"nuevo_estado\": \"suspendido\"}"
-// Activar:
-// curl -X POST http://localhost/webhook/webhook.php -H "Content-Type: application/json" -d "{\"id\": 1, \"nuevo_estado\": \"activo\"}"
+// curl -X POST http://localhost/webhook/webhook.php -H "Content-Type: application/json" -d "{\"id_pulsera\": 1, \"nuevo_estado\": \"apagado\"}"
+// Encender:
+// curl -X POST http://localhost/webhook/webhook.php -H "Content-Type: application/json" -d "{\"id_pulsera\": 1, \"nuevo_estado\": \"encendido\"}"
