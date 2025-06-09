@@ -55,11 +55,8 @@ $result_historial = $conexion->query($query_historial);
                     if (response.error) {
                         $('#estado-boton').text('Error: ' + response.error);
                     } else {
-                        const estado = response.estado_boton == 1 ? 'Encendido' : 'Apagado';
+                        const estado = response.estado;
                         $('#estado-boton').text('Estado del botón: ' + estado);
-                        if(response.estado_boton == 1) {
-                            console.log('El botón está encendido');
-                        } 
                     }
                 },
                 error: function() {
