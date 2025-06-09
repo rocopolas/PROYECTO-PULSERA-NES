@@ -3,36 +3,35 @@ session_start(); // Inicia la sesión
 
 // Verifica si el usuario está autenticado
 if (!isset($_SESSION['username'])) {
-    header("Location: index.html"); // Redirige al formulario de inicio de sesión si no está autenticado
+    header("Location: index.html");
+    exit();
+}
+
+// Verifica si se ha seleccionado una pulsera
+if (!isset($_SESSION['selected_pulsera'])) {
+    header("Location: selector_pulsera.php");
     exit();
 }
 
 // Conexión a la base de datos
-$conexion = new mysqli("localhost", "root", "", "usuarios");
+$conexion = new mysqli("localhost", "root", "", "nes");
 
 if ($conexion->connect_error) {
     die("Error de conexión: " . $conexion->connect_error);
 }
 
-// Obtener el id del usuario logueado (puedes ajustar esto según tu estructura de sesión)
-$username = $_SESSION['username'];
-$query_usuario = "SELECT id FROM usuarios2 WHERE username = '$username'";
-$result_usuario = $conexion->query($query_usuario);
+// Obtener información de la pulsera seleccionada
+$id_pulsera = $_SESSION['selected_pulsera'];
+$query_pulsera = "SELECT alias, funcionamiento FROM pulseras WHERE id = '$id_pulsera'";
+$result_pulsera = $conexion->query($query_pulsera);
+$pulsera = $result_pulsera->fetch_assoc();
 
-if ($result_usuario->num_rows > 0) {
-    $row_usuario = $result_usuario->fetch_assoc();
-    $id_usuario = $row_usuario['id'];
-
-    // Obtener los registros del usuario desde la tabla registro_botones
-    $query_registros = "SELECT timestamp, ip_usuario, estado 
-                        FROM registro_botones 
-                        WHERE id_usuario = $id_usuario 
-                        ORDER BY timestamp DESC";
-    $result_registros = $conexion->query($query_registros);
-} else {
-    $id_usuario = null;
-    $result_registros = null;
-}
+// Obtener el historial de la pulsera
+$query_historial = "SELECT timestamp, estado 
+                    FROM registro_botones 
+                    WHERE id_pulsera = '$id_pulsera' 
+                    ORDER BY timestamp DESC";
+$result_historial = $conexion->query($query_historial);
 ?>
 
 <!DOCTYPE html>
@@ -79,10 +78,34 @@ if ($result_usuario->num_rows > 0) {
 </head>
 <body class="bg-light">
     <div class="container mt-5">
-        <h1 class="text-center">Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-        <p class="text-center">Aca veras toda la informacion de la pulsera</p>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">Pulsera: <?php echo htmlspecialchars($pulsera['alias']); ?></h1>
+            <div class="btn-group">
+                <a href="selector_pulsera.php" class="btn btn-secondary">Cambiar Pulsera</a>
+                <a href="logout.php" class="btn btn-danger">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Estado Actual</h5>
+                        <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Información de la Pulsera</h5>
+                        <p><strong>Alias:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
+                        <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
         <h3 class="mt-4">Historial de eventos</h3>
         <?php
         // Paginación

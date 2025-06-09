@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'usuarios';
+$dbname = 'nes';
 $username = 'root';
 $password = '';
 

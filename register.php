@@ -3,15 +3,17 @@ session_start();
 require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
+    $nombre = $_POST['nombre'];
+    $email = $_POST['email'];
+    $direccion = $_POST['direccion'];
     $password = $_POST['password'];
     
     // Hash de la contraseña usando bcrypt
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-        $stmt->execute([$username, $hashed_password]);
+        $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, email, contraseña, direccion) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$nombre, $email, $hashed_password, $direccion]);
         
         $_SESSION['message'] = "Registro exitoso! Puedes iniciar sesión ahora.";
         header("Location: login.php");
@@ -47,8 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <form method="POST" action="">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Nombre de usuario</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="direccion" name="direccion">
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
