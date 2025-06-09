@@ -16,7 +16,7 @@ if ($conexion->connect_error) {
 
 // Obtener el id del usuario logueado (puedes ajustar esto según tu estructura de sesión)
 $username = $_SESSION['username'];
-$query_usuario = "SELECT id FROM users WHERE username = '$username'";
+$query_usuario = "SELECT id FROM usuarios2 WHERE username = '$username'";
 $result_usuario = $conexion->query($query_usuario);
 
 if ($result_usuario->num_rows > 0) {
@@ -24,7 +24,7 @@ if ($result_usuario->num_rows > 0) {
     $id_usuario = $row_usuario['id'];
 
     // Obtener los registros del usuario desde la tabla registro_botones
-    $query_registros = "SELECT id_evento, timestamp, ip_usuario, estado 
+    $query_registros = "SELECT timestamp, ip_usuario, estado 
                         FROM registro_botones 
                         WHERE id_usuario = $id_usuario 
                         ORDER BY timestamp DESC";
@@ -81,6 +81,8 @@ if ($result_usuario->num_rows > 0) {
     <div class="container mt-5">
         <h1 class="text-center">Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
         <p class="text-center">Aca veras toda la informacion de la pulsera</p>
+
+        <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
         <h3 class="mt-4">Historial de eventos</h3>
         <?php
         // Paginación
@@ -89,11 +91,11 @@ if ($result_usuario->num_rows > 0) {
         $offset = ($pagina_actual - 1) * $eventos_por_pagina;
 
         // Consulta con límite y desplazamiento
-        $query_paginada = "SELECT id_evento, timestamp, ip_usuario, estado 
-                           FROM registro_botones 
-                           WHERE id_usuario = $id_usuario 
-                           ORDER BY timestamp DESC 
-                           LIMIT $eventos_por_pagina OFFSET $offset";
+        $query_paginada = "SELECT timestamp, ip_usuario, estado 
+                            FROM registro_botones 
+                            WHERE id_usuario = $id_usuario 
+                            ORDER BY timestamp DESC 
+                            LIMIT $eventos_por_pagina OFFSET $offset";
         $result_paginada = $conexion->query($query_paginada);
 
         // Total de registros para calcular el número de páginas
@@ -107,7 +109,6 @@ if ($result_usuario->num_rows > 0) {
             <table class="table table-bordered table-striped mt-3">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID Evento</th>
                         <th>Fecha y Hora</th>
                         <th>IP Usuario</th>
                         <th>Estado</th>
@@ -116,10 +117,9 @@ if ($result_usuario->num_rows > 0) {
                 <tbody>
                     <?php while ($row = $result_paginada->fetch_assoc()): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($row['id_evento']); ?></td>
                             <td><?php echo htmlspecialchars($row['timestamp']); ?></td>
                             <td><?php echo htmlspecialchars($row['ip_usuario']); ?></td>
-                            <td><?php echo htmlspecialchars($row['estado']); ?></td>
+                            <td><?php echo ($row['estado'] == 1) ? 'Encendido' : 'Apagado'; ?></td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
