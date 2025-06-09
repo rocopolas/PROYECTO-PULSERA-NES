@@ -27,10 +27,11 @@ $result_pulsera = $conexion->query($query_pulsera);
 $pulsera = $result_pulsera->fetch_assoc();
 
 // Obtener el historial de la pulsera
-$query_historial = "SELECT timestamp, estado 
-                    FROM registro_botones 
+$query_historial = "SELECT timestamp, estado_pulsera 
+                    FROM historialpulseras 
                     WHERE id_pulsera = '$id_pulsera' 
                     ORDER BY timestamp DESC";
+
 $result_historial = $conexion->query($query_historial);
 ?>
 
@@ -114,35 +115,33 @@ $result_historial = $conexion->query($query_historial);
         $offset = ($pagina_actual - 1) * $eventos_por_pagina;
 
         // Consulta con límite y desplazamiento
-        $query_paginada = "SELECT timestamp, ip_usuario, estado 
-                            FROM registro_botones 
-                            WHERE id_usuario = $id_usuario 
+        $query_paginada = "SELECT timestamp, estado_pulsera 
+                            FROM historialpulseras 
+                            WHERE id_pulsera = '$id_pulsera' 
                             ORDER BY timestamp DESC 
                             LIMIT $eventos_por_pagina OFFSET $offset";
         $result_paginada = $conexion->query($query_paginada);
 
         // Total de registros para calcular el número de páginas
-        $query_total = "SELECT COUNT(*) as total FROM registro_botones WHERE id_usuario = $id_usuario";
+        $query_total = "SELECT COUNT(*) as total FROM historialpulseras WHERE id_pulsera = '$id_pulsera'";
         $result_total = $conexion->query($query_total);
         $total_eventos = $result_total->fetch_assoc()['total'];
         $total_paginas = ceil($total_eventos / $eventos_por_pagina);
         ?>
 
-        <?php if ($result_paginada && $result_paginada->num_rows > 0): ?>
+        <?php if ($result_historial && $result_historial->num_rows > 0): ?>
             <table class="table table-bordered table-striped mt-3">
                 <thead class="table-dark">
                     <tr>
                         <th>Fecha y Hora</th>
-                        <th>IP Usuario</th>
                         <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = $result_paginada->fetch_assoc()): ?>
+                    <?php while ($row = $result_historial->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($row['timestamp']); ?></td>
-                            <td><?php echo htmlspecialchars($row['ip_usuario']); ?></td>
-                            <td><?php echo ($row['estado'] == 1) ? 'Encendido' : 'Apagado'; ?></td>
+                            <td><?php echo htmlspecialchars($row['estado_pulsera']); ?></td>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
