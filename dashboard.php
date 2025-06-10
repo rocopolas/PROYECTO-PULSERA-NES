@@ -176,10 +176,7 @@ $result_historial = $conexion->query($query_historial);
         <?php else: ?>
             <p class="text-center text-danger">No hay registros disponibles para este usuario.</p>
         <?php endif; ?>
-        <br>
-        <div class="text-center mb-3">
-            <a href="logout.php" class="btn btn-danger">Cerrar sesión</a>
-        </div>
+        
     </div>
 
     <!-- Bootstrap JS -->
