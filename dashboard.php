@@ -26,6 +26,13 @@ $query_pulsera = "SELECT alias, funcionamiento FROM pulseras WHERE id = '$id_pul
 $result_pulsera = $conexion->query($query_pulsera);
 $pulsera = $result_pulsera->fetch_assoc();
 
+// Verificar si el usuario es administrador de esta pulsera
+$id_usuario = $_SESSION['user_id'];
+$query_admin = "SELECT COUNT(*) as es_admin FROM administradorxpulsera WHERE id_usuario = '$id_usuario' AND id_pulsera = '$id_pulsera'";
+$result_admin = $conexion->query($query_admin);
+$es_admin = $result_admin->fetch_assoc();
+$es_admin = $es_admin['es_admin'] > 0;
+
 // Obtener el historial de la pulsera
 $query_historial = "SELECT timestamp, estado_pulsera 
                     FROM historialpulseras 
@@ -65,6 +72,29 @@ $result_historial = $conexion->query($query_historial);
             });
         }
 
+        // Función para generar código de invitación
+        function generarCodigo() {
+            $.ajax({
+                url: 'generar_codigo_invitacion.php',
+                method: 'POST',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#codigoGenerado').removeClass('d-none');
+                        $('#codigoTexto').text(response.codigo);
+                        $('#mensajeError').addClass('d-none');
+                    } else {
+                        $('#mensajeError').removeClass('d-none');
+                        $('#mensajeError').text(response.message);
+                    }
+                },
+                error: function() {
+                    $('#mensajeError').removeClass('d-none');
+                    $('#mensajeError').text('Error al generar el código de invitación');
+                }
+            });
+        }
+
         // Actualiza el estado cada 1 segundos
         setInterval(actualizarEstado, 1000);
 
@@ -99,6 +129,37 @@ $result_historial = $conexion->query($query_historial);
                         <h5 class="card-title">Información de la Pulsera</h5>
                         <p><strong>Alias:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
                         <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
+                        <?php if ($es_admin): ?>
+                            <p class="text-success"><strong>Eres administrador de esta pulsera</strong></p>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
+                                    Generar Código de Invitación
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para generar código de invitación -->
+        <div class="modal fade" id="generarCodigoModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Generar Código de Invitación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="codigoGenerado" class="alert alert-info d-none">
+                            <p><strong>Código de invitación generado:</strong> <span id="codigoTexto"></span></p>
+                            <p>Comparte este código con la persona que deseas que vea la pulsera. El código se usará una sola vez y luego se deshabilitará.</p>
+                        </div>
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="generarCodigo()">Generar Código</button>
                     </div>
                 </div>
             </div>

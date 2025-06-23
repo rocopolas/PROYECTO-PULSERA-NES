@@ -32,11 +32,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seleccionar Pulsera</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function registerBracelet() {
+            const idPulsera = document.getElementById('id_pulsera').value;
+            const messageBox = document.getElementById('messageBox');
+            
+            if (!idPulsera) {
+                messageBox.className = 'alert alert-danger d-block';
+                messageBox.textContent = 'Por favor ingrese el ID de la pulsera';
+                return;
+            }
+
+            $.ajax({
+                url: 'register_bracelet.php',
+                method: 'POST',
+                data: { id_pulsera: idPulsera },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        messageBox.className = 'alert alert-success d-block';
+                        messageBox.textContent = response.message;
+                        document.getElementById('id_pulsera').value = '';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        messageBox.className = 'alert alert-danger d-block';
+                        messageBox.textContent = response.message;
+                    }
+                },
+                error: function() {
+                    messageBox.className = 'alert alert-danger d-block';
+                    messageBox.textContent = 'Error al registrar la pulsera. Por favor intente nuevamente.';
+                }
+            });
+        }
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
+            <a href="logout.php" class="btn btn-danger">Cerrar Sesión</a>
+        </div>
         <h2 class="text-center mb-4">Selecciona una pulsera para ver su dashboard</h2>
         
         <div class="row justify-content-center">
@@ -54,9 +95,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Ver Dashboard</button>
+                    <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
+                        Registrar Pulsera
+                    </button>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Modal para registrar pulsera -->
+    <div class="modal fade" id="registerBraceletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Pulsera</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="id_pulsera" class="form-label">ID de la Pulsera</label>
+                        <input type="text" class="form-control" id="id_pulsera" required>
+                    </div>
+                    <div id="messageBox" class="alert d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="registerBracelet()">Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function registerBracelet() {
+            const idPulsera = document.getElementById('id_pulsera').value;
+            const messageBox = document.getElementById('messageBox');
+            
+            if (!idPulsera) {
+                messageBox.className = 'alert alert-danger d-block';
+                messageBox.textContent = 'Por favor ingrese el ID de la pulsera';
+                return;
+            }
+
+            $.ajax({
+                url: 'register_pulser_manual.php',
+                method: 'POST',
+                data: { id_pulsera: idPulsera },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        messageBox.className = 'alert alert-success d-block';
+                        messageBox.textContent = response.message;
+                        document.getElementById('id_pulsera').value = '';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        messageBox.className = 'alert alert-danger d-block';
+                        messageBox.textContent = response.message;
+                    }
+                },
+                error: function() {
+                    messageBox.className = 'alert alert-danger d-block';
+                    messageBox.textContent = 'Error al registrar la pulsera. Por favor intente nuevamente.';
+                }
+            });
+        }
+    </script>
+    
 </body>
 </html>
