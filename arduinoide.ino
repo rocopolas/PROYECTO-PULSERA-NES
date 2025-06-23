@@ -3,7 +3,7 @@
 
 const char* ssid = "LOL-2.4";         // Reemplaza con tu red WiFi
 const char* password = "00425174082"; // Reemplaza con tu contraseña WiFi
-
+ 
 const char* webhookUrl = "http://192.168.0.95/webhook/webhook.php";
 
 const int botonPin = 15; 
