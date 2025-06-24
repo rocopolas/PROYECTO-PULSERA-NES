@@ -98,6 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                     <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
                         Registrar Pulsera
                     </button>
+                    <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#codigoInvitacionModal">
+                        Usar Código de Invitación
+                    </button>
                 </form>
             </div>
         </div>
@@ -121,6 +124,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="registerBracelet()">Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para usar código de invitación -->
+    <div class="modal fade" id="codigoInvitacionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Usar Código de Invitación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="codigo" class="form-label">Código de Invitación:</label>
+                        <input type="text" class="form-control" id="codigo" required>
+                        <div id="mensajeCodigo" class="alert alert-danger d-none mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="usarCodigo()">Usar Código</button>
                 </div>
             </div>
         </div>
@@ -161,7 +187,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                 }
             });
         }
+        function usarCodigo() {
+            const codigo = $('#codigo').val();
+            if (!codigo) {
+                $('#mensajeCodigo').removeClass('d-none');
+                $('#mensajeCodigo').text('Por favor ingrese un código de invitación');
+                return;
+            }
+
+            $.ajax({
+                url: 'validar_codigo_invitacion.php',
+                method: 'POST',
+                data: { codigo: codigo },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Mostrar mensaje de éxito
+                        $('#mensajeCodigo').removeClass('d-none');
+                        $('#mensajeCodigo').removeClass('alert-danger');
+                        $('#mensajeCodigo').addClass('alert-success');
+                        $('#mensajeCodigo').text(response.message);
+                        
+                        // Guardar la pulsera en la sesión y redirigir después de un breve delay
+                        setTimeout(function() {
+                            $.ajax({
+                                url: 'set_pulsera.php',
+                                method: 'POST',
+                                data: { id_pulsera: response.id_pulsera },
+                                success: function() {
+                                    window.location.href = 'dashboard.php';
+                                }
+                            });
+                        }, 1000);
+                    } else {
+                        $('#mensajeCodigo').removeClass('d-none');
+                        $('#mensajeCodigo').text(response.message);
+                    }
+                },
+                error: function() {
+                    $('#mensajeCodigo').removeClass('d-none');
+                    $('#mensajeCodigo').text('Error al validar el código de invitación');
+                }
+            });
+        }
     </script>
-    
 </body>
 </html>
