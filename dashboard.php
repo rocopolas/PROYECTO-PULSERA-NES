@@ -187,7 +187,9 @@ $result_historial = $conexion->query($query_historial);
                         $('#estado-boton').text('Error: ' + response.error);
                     } else {
                         const estado = response.estado;
-                        $('#estado-boton').text('Estado del botón: ' + estado);
+                        // El estado puede ser 'activado' o 'desactivado'. Si es 'activado', el botón tendrá la clase 'btn-success' y el texto "Activado". De lo contrario, tendrá la clase 'btn-danger' y el texto "Desactivado".
+                        // charAt(0) devuelve el primer carácter de la cadena y slice(1) devuelve la cadena sin el primer carácter. De esta forma, estamos obteniendo la primera letra de la cadena y concatenando el resto de la cadena sin la primera letra. Esto es para que el estado 'activado' se muestre como 'Activado' y el estado 'desactivado' se muestre como 'Desactivado'.
+                        $('#estado-boton').text(estado.charAt(0).toUpperCase() + estado.slice(1));
                     }
                 },
                 error: function() {
