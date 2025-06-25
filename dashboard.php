@@ -52,6 +52,130 @@ $result_historial = $conexion->query($query_historial);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // Función para cargar usuarios y sus permisos
+        function cargarUsuarios() {
+            $.ajax({
+                url: 'get_usuarios_admin.php',
+                method: 'GET',
+                data: { id_pulsera: <?php echo $id_pulsera; ?> },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.error) {
+                        $('#adminError').removeClass('d-none').text(response.error);
+                        return;
+                    }
+                    
+                    let html = '';
+                    response.usuarios.forEach(usuario => {
+                        // Use the boolean value directly from the server response
+                        const esAdmin = usuario.es_admin;
+                        html += `
+                            <tr>
+                                <td>${usuario.nombre}</td>
+                                <td>
+                                    <span class="badge ${esAdmin ? 'bg-success' : 'bg-secondary'}" data-user-id="${usuario.id}">
+                                        ${esAdmin ? 'Sí' : 'No'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm ${esAdmin ? 'btn-danger' : 'btn-success'} ${usuario.id == <?php echo $id_usuario; ?> ? 'disabled' : ''} btn-admin" 
+                                                data-user-id="${usuario.id}">
+                                            ${esAdmin ? 'Quitar Administrador' : 'Dar Administrador'}
+                                        </button>
+                                        <button class="btn btn-sm btn-danger ${usuario.id == <?php echo $id_usuario; ?> ? 'disabled' : ''} btn-delete" data-user-id="${usuario.id}">
+                                            Eliminar acceso
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    $('#usuariosList').html(html);
+
+                    // Añadir eventos de clic después de cargar los usuarios
+                    $('.btn-admin').off('click').on('click', function() {
+                        const userId = $(this).data('user-id');
+                        const esAdmin = $(this).hasClass('btn-danger');
+                        // Usamos el valor opuesto de esAdmin ya que estamos cambiando el estado
+                        cambiarPermiso(userId, !esAdmin);
+                    });
+
+                    $('.btn-delete').off('click').on('click', function() {
+                        const userId = $(this).data('user-id');
+                        eliminarPermiso(userId);
+                    });
+                },
+                error: function() {
+                    $('#adminError').removeClass('d-none').text('Error al cargar los usuarios');
+                }
+            });
+        }
+
+        // Función para cambiar permisos de administrador
+        function cambiarPermiso(userId, esAdmin) {
+            console.log('Cambiando permiso para usuario:', userId, 'esAdmin:', esAdmin);
+            
+            // Deshabilitar el botón mientras se procesa
+            const button = $(`button[data-user-id="${userId}"]`);
+            button.prop('disabled', true);
+            
+            $.ajax({
+                url: 'cambiar_permiso_admin.php',
+                method: 'POST',
+                data: { 
+                    id_usuario: userId, 
+                    id_pulsera: <?php echo $id_pulsera; ?>,
+                    es_admin: esAdmin ? 1 : 0  // 1 para dar administrador, 0 para quitar
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Respuesta del servidor:', response);
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        button.prop('disabled', false);
+                        return;
+                    }
+                    
+                    // Recargar los usuarios para actualizar el estado
+                    cargarUsuarios();
+                    
+                    // Habilitar el botón
+                    button.prop('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error AJAX:', error);
+                    alert('Error al cambiar permisos: ' + error);
+                    button.prop('disabled', false);
+                }
+            });
+        }
+
+        // Función para eliminar acceso
+        function eliminarPermiso(userId) {
+            if (confirm('¿Estás seguro de que quieres eliminar el acceso de este usuario?')) {
+                $.ajax({
+                    url: 'eliminar_acceso.php',
+                    method: 'POST',
+                    data: { 
+                        id_usuario: userId, 
+                        id_pulsera: <?php echo $id_pulsera; ?>
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.error) {
+                            alert('Error: ' + response.error);
+                        } else {
+                            cargarUsuarios();
+                        }
+                    },
+                    error: function() {
+                        alert('Error al eliminar acceso');
+                    }
+                });
+            }
+        }
+
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
@@ -101,6 +225,9 @@ $result_historial = $conexion->query($query_historial);
         // Llama a la función al cargar la página
         $(document).ready(function() {
             actualizarEstado();
+            $('#adminModal').on('shown.bs.modal', function () {
+                cargarUsuarios();
+            });
         });
     </script>
 </head>
@@ -132,11 +259,46 @@ $result_historial = $conexion->query($query_historial);
                         <?php if ($es_admin): ?>
                             <p class="text-success"><strong>Eres administrador de esta pulsera</strong></p>
                             <div class="mt-3">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
                                     Generar Código de Invitación
+                                </button>
+                                <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#adminModal">
+                                    Administrar Usuarios
                                 </button>
                             </div>
                         <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para administrar usuarios -->
+        <div class="modal fade" id="adminModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Administrar Usuarios de la Pulsera</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="usuariosAdmin" class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Es Administrador</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuariosList">
+                                    <!-- Los usuarios se cargarán dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="adminError" class="alert alert-danger d-none"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>
