@@ -245,7 +245,7 @@ $result_historial = $conexion->query($query_historial);
         
         <div class="row mb-4">
             <div class="col-md-6">
-                <div class="card">
+                <div class="card mb-2">
                     <div class="card-body">
                         <h5 class="card-title">Estado Actual</h5>
                         <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
@@ -260,11 +260,11 @@ $result_historial = $conexion->query($query_historial);
                         <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
                         <?php if ($es_admin): ?>
                             <p class="text-success"><strong>Eres administrador de esta pulsera</strong></p>
-                            <div class="mt-3">
-                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
+                            <div class="d-flex flex-column flex-md-row mt-3">
+                                <button type="button" class="btn btn-secondary mb-2 mb-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
                                     Generar Código de Invitación
                                 </button>
-                                <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#adminModal">
+                                <button type="button" class="btn btn-primary ms-2 ms-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#adminModal">
                                     Administrar Usuarios
                                 </button>
                             </div>
