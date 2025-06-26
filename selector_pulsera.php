@@ -83,24 +83,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <form method="POST" class="p-4 border rounded bg-white shadow-sm">
-                    <div class="mb-3">
-                        <label for="pulsera" class="form-label">Pulseras disponibles:</label>
-                        <select class="form-select" id="pulsera" name="id_pulsera" required>
-                            <option value="">Seleccione una pulsera...</option>
+                    <div class="mb-4">
+                        <h3 class="mb-3">Pulseras disponibles</h3>
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
                             <?php foreach ($pulseras as $pulsera): ?>
-                                <option value="<?php echo $pulsera['id']; ?>">
-                                    <?php echo htmlspecialchars($pulsera['alias']); ?> (<?php echo htmlspecialchars($pulsera['funcionamiento']); ?>)
-                                </option>
+                                <div class="col">
+                                    <button type="submit" 
+                                            name="id_pulsera" 
+                                            value="<?php echo $pulsera['id']; ?>" 
+                                            class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
+                                        <div class="fw-bold mb-2"><?php echo htmlspecialchars($pulsera['alias']); ?></div>
+                                        <div class=""><?php echo htmlspecialchars($pulsera['funcionamiento']); ?></div>
+                                    </button>
+                                </div>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Ver Dashboard</button>
-                    <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
-                        Registrar Pulsera
-                    </button>
-                    <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#codigoInvitacionModal">
-                        Usar Código de Invitación
-                    </button>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
+                            Registrar Pulsera
+                        </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codigoInvitacionModal">
+                            Usar Código de Invitación
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
