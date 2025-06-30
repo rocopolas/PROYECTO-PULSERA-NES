@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+    --fondo: rgb(254,246,244);
+    --texto: rgb(25,17,40);
+    --destacado1: rgb(35,30,66);
+    --destacado2: rgb(97,26,20);
+    --destacadoalt1: rgb(86,83,118);
+    --destacadoalt2: rgb(155,50,51);
+}
+
+body { 
+    background-color: white; 
+}
+
+form {
+    background-color: white;
+}
+
+h1 {
+    color: var(--texto) !important; 
+    font-family: 'Playfair Display SemiBold', serif;
+}
+
+h2, h3 {
+    color: var(--texto) !important; 
+    font-family: 'Playfair Display', serif;
+}
+
+label, p, input, button {
+    color: var(--texto);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-primary {
+    background-color: var(--destacadoalt1);
+    border-color: var(--destacadoalt1);
+}
+
+.btn-primary:hover {
+    background-color: var(--destacado1);
+    border-color: var(--destacado1);
+}
+
+.btn-outline-primary {
+    color: var(--destacado2);
+    border-color: var(--destacado2);
+}
+
+.btn-outline-primary:hover {
+    color: white;
+    border-color: var(--destacadoalt2);
+    background-color: var(--destacadoalt2);
+}
+
+.btn-danger{
+    background-color: var(--destacadoalt2);
+    border-color: var(--destacadoalt2);
+}
+
+.btn-danger:hover{
+    background-color: var(--destacado2);
+    border-color: var(--destacado2);
+}
+
+.text-primary{
+    color: var(--destacadoalt2) !important;
+}
+
+.page-link{
+    background-color: var(--destacadoalt1) !important;
+    color: white !important;
+}

@@ -71,15 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
         }
     </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="colors.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="">
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
             <a href="logout.php" class="btn btn-danger">Cerrar Sesión</a>
-        </div>
-        <h2 class="text-center mb-4">Selecciona una pulsera para ver su dashboard</h2>
-        
+        </div>        
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <form method="POST" class="p-4 border rounded bg-white shadow-sm">
@@ -128,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                     <div id="messageBox" class="alert d-none"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="registerBracelet()">Registrar</button>
                 </div>
             </div>
@@ -151,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" onclick="usarCodigo()">Usar Código</button>
                 </div>
             </div>

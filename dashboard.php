@@ -51,6 +51,7 @@ $result_historial = $conexion->query($query_historial);
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="colors.css" rel="stylesheet">
     <script>
         // Función para cargar usuarios y sus permisos
         function cargarUsuarios() {
@@ -233,7 +234,7 @@ $result_historial = $conexion->query($query_historial);
         });
     </script>
 </head>
-<body class="bg-light">
+<body class="">
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="mb-0">Pulsera: <?php echo htmlspecialchars($pulsera['alias']); ?></h1>
@@ -259,7 +260,7 @@ $result_historial = $conexion->query($query_historial);
                         <p><strong>Alias:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
                         <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
                         <?php if ($es_admin): ?>
-                            <p class="text-success"><strong>Eres administrador de esta pulsera</strong></p>
+                            <p class="text-primary"><strong>Eres administrador de esta pulsera</strong></p>
                             <div class="d-flex flex-column flex-md-row mt-3">
                                 <button type="button" class="btn btn-secondary mb-2 mb-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
                                     Generar Código de Invitación
