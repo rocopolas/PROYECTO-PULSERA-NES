@@ -3,6 +3,7 @@
 
 :root {
     --fondo: rgb(254,246,244);
+    --fondo2: #fafafa;
     --texto: rgb(25,17,40);
     --destacado1: rgb(35,30,66);
     --destacado2: rgb(97,26,20);
@@ -11,11 +12,11 @@
 }
 
 body { 
-    background-color: white; 
+    background-color: var(--fondo2); 
 }
 
 form {
-    background-color: white;
+    background-color: var(--fondo2);
 }
 
 h1 {
@@ -49,9 +50,9 @@ label, p, input, button {
 }
 
 .btn-outline-primary:hover {
-    color: white;
-    border-color: var(--destacadoalt2);
-    background-color: var(--destacadoalt2);
+    color: white !important;
+    border-color: var(--destacadoalt2) !important;
+    background-color: var(--destacadoalt2) !important;
 }
 
 .btn-danger{
