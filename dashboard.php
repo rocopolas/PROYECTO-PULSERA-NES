@@ -215,7 +215,7 @@ $es_admin = $es_admin['es_admin'] > 0;
             });
         }
 
-        // Actualiza el estado cada 1 segundos
+        // Actualiza el estado cada segundo
         setInterval(actualizarEstado, 1000);
 
         // Llama a la función al cargar la página
