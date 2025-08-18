@@ -20,14 +20,13 @@ if ($conexion->connect_error) {
     die("Error de conexión: " . $conexion->connect_error);
 }
 
-// Obtener información del equipo seleccionado y su pulsera
+// Obtener información del equipo y la pulsera seleccionados
 $id_equipo = $_SESSION['selected_equipo'];
-$query_pulsera = "SELECT p.id AS id_pulsera, p.alias, p.funcionamiento, e.nombre_equipo FROM equipos e JOIN pulseras p ON e.pulsera_id = p.id WHERE e.id = '$id_equipo'";
+$id_pulsera = $_SESSION['selected_pulsera'];
+$query_pulsera = "SELECT p.id AS id_pulsera, p.alias, p.funcionamiento, e.nombre_equipo FROM pulseras p JOIN equipos e ON p.equipo_id = e.id WHERE p.id = '$id_pulsera' AND e.id = '$id_equipo'";
 $result_pulsera = $conexion->query($query_pulsera);
 $pulsera = $result_pulsera->fetch_assoc();
-$id_pulsera = $pulsera['id_pulsera'];
-// Guardar id de pulsera en la sesión para compatibilidad
-$_SESSION['selected_pulsera'] = $id_pulsera;
+
 $nombre_equipo = $pulsera['nombre_equipo'];
 
 // Verificar si el usuario es administrador de esta pulsera

@@ -8,7 +8,8 @@ try {
     $usuarios = $usuariosStmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Pulseras que aún no están asociadas a un equipo
-    $pulserasStmt = $pdo->query("SELECT id, alias FROM pulseras WHERE id NOT IN (SELECT pulsera_id FROM equipos)");
+    $pulserasStmt = $pdo->query("SELECT id, alias FROM pulseras WHERE equipo_id IS NULL");
+
     $pulseras = $pulserasStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Error al obtener datos: " . $e->getMessage());
@@ -17,14 +18,27 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre_equipo'] ?? '';
     $responsable = $_POST['responsable'] ?? '';
-    $pulsera_id = $_POST['pulsera_id'] ?? '';
 
-    if ($nombre && $responsable && $pulsera_id) {
+    $pulsera_ids = $_POST['pulsera_ids'] ?? [];
+
+    if ($nombre && $responsable && !empty($pulsera_ids)) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO equipos (nombre_equipo, responsable_equipo, pulsera_id) VALUES (?, ?, ?)");
-            $stmt->execute([$nombre, $responsable, $pulsera_id]);
+            $pdo->beginTransaction();
+
+            $stmt = $pdo->prepare("INSERT INTO equipos (nombre_equipo, responsable_equipo) VALUES (?, ?)");
+            $stmt->execute([$nombre, $responsable]);
+            $equipo_id = $pdo->lastInsertId();
+
+            $updateStmt = $pdo->prepare("UPDATE pulseras SET equipo_id = ? WHERE id = ?");
+            foreach ($pulsera_ids as $pid) {
+                $updateStmt->execute([$equipo_id, $pid]);
+            }
+
+            $pdo->commit();
             $_SESSION['message'] = 'Equipo registrado exitosamente';
         } catch (PDOException $e) {
+            $pdo->rollBack();
+          
             $_SESSION['error'] = 'Error al registrar el equipo: ' . $e->getMessage();
         }
     } else {
@@ -65,13 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
         <div class="mb-3">
-            <label for="pulsera_id" class="form-label">Pulsera</label>
-            <select id="pulsera_id" name="pulsera_id" class="form-select" required>
-                <option value="">Seleccione...</option>
+            <label for="pulsera_ids" class="form-label">Pulseras</label>
+            <select id="pulsera_ids" name="pulsera_ids[]" class="form-select" multiple required>
+
                 <?php foreach ($pulseras as $pulsera): ?>
                     <option value="<?= $pulsera['id']; ?>"><?= htmlspecialchars($pulsera['alias']); ?></option>
                 <?php endforeach; ?>
             </select>
+            <div class="form-text">Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar varias pulseras.</div>
         </div>
         <button type="submit" class="btn btn-primary">Registrar</button>
     </form>

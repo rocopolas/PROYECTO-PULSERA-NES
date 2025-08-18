@@ -135,6 +135,7 @@ CREATE TABLE `pulseras` (
   `version` varchar(20) DEFAULT NULL,
   `funcionamiento` enum('funcionando','averiada','mantenimiento') DEFAULT 'funcionando',
   `alias` varchar(50) DEFAULT NULL,
+  `equipo_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -142,10 +143,10 @@ CREATE TABLE `pulseras` (
 -- Dumping data for table `pulseras`
 --
 
-INSERT INTO `pulseras` (`id`, `fecha_emision`, `version`, `funcionamiento`, `alias`, `created_at`) VALUES
-(1, '2006-08-18', '1.0', 'mantenimiento', 'Marta', '2025-06-09 23:24:10'),
-(2, '2007-01-24', '1.0', 'funcionando', 'Pato (bullrich)', '2025-06-09 23:28:00'),
-(3, '2006-06-23', '6.6.6', 'funcionando', 'Colucci', '2025-06-23 21:57:28');
+INSERT INTO `pulseras` (`id`, `fecha_emision`, `version`, `funcionamiento`, `alias`, `equipo_id`, `created_at`) VALUES
+(1, '2006-08-18', '1.0', 'mantenimiento', 'Marta', NULL, '2025-06-09 23:24:10'),
+(2, '2007-01-24', '1.0', 'funcionando', 'Pato (bullrich)', NULL, '2025-06-09 23:28:00'),
+(3, '2006-06-23', '6.6.6', 'funcionando', 'Colucci', NULL, '2025-06-23 21:57:28');
 
 -- --------------------------------------------------------
 
@@ -191,6 +192,19 @@ INSERT INTO `usuariosxpulseras` (`id_usuario`, `id_pulsera`, `fecha_asignacion`)
 (2, 1, '2025-07-07 23:23:50'),
 (2, 2, '2025-07-07 23:24:17');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `equipos`
+--
+
+CREATE TABLE `equipos` (
+  `id` int(11) NOT NULL,
+  `nombre_equipo` varchar(100) NOT NULL,
+  `responsable_equipo` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -221,12 +235,20 @@ ALTER TABLE `historialxpulseras`
   ADD KEY `id_pulsera` (`id_pulsera`);
 
 --
+-- Indexes for table `equipos`
+--
+ALTER TABLE `equipos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_responsable_equipo` (`responsable_equipo`);
+
+--
 -- Indexes for table `pulseras`
 --
 ALTER TABLE `pulseras`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `alias` (`alias`),
-  ADD KEY `idx_pulseras_alias` (`alias`);
+  ADD KEY `idx_pulseras_alias` (`alias`),
+  ADD KEY `idx_pulseras_equipo` (`equipo_id`);
 
 --
 -- Indexes for table `usuarios`
@@ -272,6 +294,12 @@ ALTER TABLE `pulseras`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `equipos`
+--
+ALTER TABLE `equipos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -280,6 +308,18 @@ ALTER TABLE `usuarios`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `equipos`
+--
+ALTER TABLE `equipos`
+  ADD CONSTRAINT `equipos_ibfk_1` FOREIGN KEY (`responsable_equipo`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `pulseras`
+--
+ALTER TABLE `pulseras`
+  ADD CONSTRAINT `pulseras_ibfk_1` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `codigos_invitacion`
