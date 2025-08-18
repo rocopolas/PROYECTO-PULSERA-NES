@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost
--- Tiempo de generación: 24-06-2025 a las 02:16:52
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Host: localhost
+-- Generation Time: Aug 18, 2025 at 07:49 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `nes`
+-- Database: `nes`
 --
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `administradorxpulsera`
+-- Table structure for table `administradorxpulsera`
 --
 
 CREATE TABLE `administradorxpulsera` (
@@ -34,17 +34,17 @@ CREATE TABLE `administradorxpulsera` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `administradorxpulsera`
+-- Dumping data for table `administradorxpulsera`
 --
 
 INSERT INTO `administradorxpulsera` (`id_usuario`, `id_pulsera`, `fecha_creacion`) VALUES
-(1, 1, '2025-06-23 23:57:45'),
-(1, 2, '2025-06-24 00:15:20');
+(1, 1, '2025-07-07 23:20:25'),
+(2, 2, '2025-07-07 23:24:17');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `codigos_invitacion`
+-- Table structure for table `codigos_invitacion`
 --
 
 CREATE TABLE `codigos_invitacion` (
@@ -57,7 +57,7 @@ CREATE TABLE `codigos_invitacion` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `codigos_invitacion`
+-- Dumping data for table `codigos_invitacion`
 --
 
 INSERT INTO `codigos_invitacion` (`id`, `id_pulsera`, `codigo`, `fecha_creacion`, `fecha_uso`, `id_usuario_uso`) VALUES
@@ -65,12 +65,15 @@ INSERT INTO `codigos_invitacion` (`id`, `id_pulsera`, `codigo`, `fecha_creacion`
 (3, 1, '046001224b8a61c7308f28c228d9245e', '2025-06-23 23:52:50', '2025-06-23 23:53:19', 2),
 (4, 1, '12547c4571fc2aa972f874cbbfdb05b4', '2025-06-23 23:54:02', '2025-06-23 23:54:17', 2),
 (5, 1, '36f9c1c2b2bfff8fe692c05a3e6df812', '2025-06-23 23:56:56', '2025-06-23 23:57:09', 2),
-(6, 1, 'b8661a460c4779b978f7bb831af53888', '2025-06-23 23:58:04', '2025-06-23 23:58:20', 2);
+(6, 1, 'b8661a460c4779b978f7bb831af53888', '2025-06-23 23:58:04', '2025-06-23 23:58:20', 2),
+(7, 1, 'ccce3362db1ed078b71c1dd58a2a32fb', '2025-06-26 00:14:04', '2025-06-26 00:14:37', 2),
+(8, 1, '72a399df0ff97a6642ba8cf0ca74c1d0', '2025-06-26 22:03:44', '2025-06-26 22:04:24', 2),
+(9, 1, 'ea7e6cb3c75c1f00df57761d5c8f1e7c', '2025-07-07 23:20:52', '2025-07-07 23:23:50', 2);
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `historialpulseras`
+-- Table structure for table `historialpulseras`
 --
 
 CREATE TABLE `historialpulseras` (
@@ -81,7 +84,7 @@ CREATE TABLE `historialpulseras` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `historialpulseras`
+-- Dumping data for table `historialpulseras`
 --
 
 INSERT INTO `historialpulseras` (`id`, `id_pulsera`, `estado_pulsera`, `timestamp`) VALUES
@@ -99,7 +102,31 @@ INSERT INTO `historialpulseras` (`id`, `id_pulsera`, `estado_pulsera`, `timestam
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `pulseras`
+-- Table structure for table `historialxpulseras`
+--
+
+CREATE TABLE `historialxpulseras` (
+  `event_id` int(11) NOT NULL,
+  `id_pulsera` int(11) NOT NULL,
+  `timestamp` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `historialxpulseras`
+--
+
+INSERT INTO `historialxpulseras` (`event_id`, `id_pulsera`, `timestamp`) VALUES
+(1, 1, '2025-08-04 19:20:34'),
+(2, 1, '2025-08-12 02:03:53'),
+(3, 1, '2025-08-12 02:08:18'),
+(4, 1, '2025-08-12 02:08:31'),
+(5, 1, '2025-08-12 02:09:26'),
+(6, 1, '2025-08-12 02:12:54');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pulseras`
 --
 
 CREATE TABLE `pulseras` (
@@ -112,7 +139,7 @@ CREATE TABLE `pulseras` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `pulseras`
+-- Dumping data for table `pulseras`
 --
 
 INSERT INTO `pulseras` (`id`, `fecha_emision`, `version`, `funcionamiento`, `alias`, `created_at`) VALUES
@@ -123,7 +150,7 @@ INSERT INTO `pulseras` (`id`, `fecha_emision`, `version`, `funcionamiento`, `ali
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `usuarios`
+-- Table structure for table `usuarios`
 --
 
 CREATE TABLE `usuarios` (
@@ -136,7 +163,7 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `usuarios`
+-- Dumping data for table `usuarios`
 --
 
 INSERT INTO `usuarios` (`id`, `nombre`, `contraseña`, `email`, `direccion`, `created_at`) VALUES
@@ -146,7 +173,7 @@ INSERT INTO `usuarios` (`id`, `nombre`, `contraseña`, `email`, `direccion`, `cr
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `usuariosxpulseras`
+-- Table structure for table `usuariosxpulseras`
 --
 
 CREATE TABLE `usuariosxpulseras` (
@@ -156,20 +183,20 @@ CREATE TABLE `usuariosxpulseras` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `usuariosxpulseras`
+-- Dumping data for table `usuariosxpulseras`
 --
 
 INSERT INTO `usuariosxpulseras` (`id_usuario`, `id_pulsera`, `fecha_asignacion`) VALUES
-(1, 1, '2025-06-23 23:57:44'),
-(1, 2, '2025-06-24 00:15:20'),
-(2, 1, '2025-06-23 23:58:20');
+(1, 1, '2025-07-07 23:20:24'),
+(2, 1, '2025-07-07 23:23:50'),
+(2, 2, '2025-07-07 23:24:17');
 
 --
--- Índices para tablas volcadas
+-- Indexes for dumped tables
 --
 
 --
--- Indices de la tabla `codigos_invitacion`
+-- Indexes for table `codigos_invitacion`
 --
 ALTER TABLE `codigos_invitacion`
   ADD PRIMARY KEY (`id`),
@@ -179,7 +206,7 @@ ALTER TABLE `codigos_invitacion`
   ADD KEY `idx_codigo` (`codigo`);
 
 --
--- Indices de la tabla `historialpulseras`
+-- Indexes for table `historialpulseras`
 --
 ALTER TABLE `historialpulseras`
   ADD PRIMARY KEY (`id`),
@@ -187,7 +214,14 @@ ALTER TABLE `historialpulseras`
   ADD KEY `idx_historialpulseras_pulsera` (`id_pulsera`);
 
 --
--- Indices de la tabla `pulseras`
+-- Indexes for table `historialxpulseras`
+--
+ALTER TABLE `historialxpulseras`
+  ADD PRIMARY KEY (`event_id`),
+  ADD KEY `id_pulsera` (`id_pulsera`);
+
+--
+-- Indexes for table `pulseras`
 --
 ALTER TABLE `pulseras`
   ADD PRIMARY KEY (`id`),
@@ -195,7 +229,7 @@ ALTER TABLE `pulseras`
   ADD KEY `idx_pulseras_alias` (`alias`);
 
 --
--- Indices de la tabla `usuarios`
+-- Indexes for table `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
@@ -203,59 +237,71 @@ ALTER TABLE `usuarios`
   ADD KEY `idx_usuarios_email` (`email`);
 
 --
--- Indices de la tabla `usuariosxpulseras`
+-- Indexes for table `usuariosxpulseras`
 --
 ALTER TABLE `usuariosxpulseras`
   ADD PRIMARY KEY (`id_usuario`,`id_pulsera`),
   ADD KEY `id_pulsera` (`id_pulsera`);
 
 --
--- AUTO_INCREMENT de las tablas volcadas
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT de la tabla `codigos_invitacion`
+-- AUTO_INCREMENT for table `codigos_invitacion`
 --
 ALTER TABLE `codigos_invitacion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT de la tabla `historialpulseras`
+-- AUTO_INCREMENT for table `historialpulseras`
 --
 ALTER TABLE `historialpulseras`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT de la tabla `pulseras`
+-- AUTO_INCREMENT for table `historialxpulseras`
+--
+ALTER TABLE `historialxpulseras`
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `pulseras`
 --
 ALTER TABLE `pulseras`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `usuarios`
+-- AUTO_INCREMENT for table `usuarios`
 --
 ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- Restricciones para tablas volcadas
+-- Constraints for dumped tables
 --
 
 --
--- Filtros para la tabla `codigos_invitacion`
+-- Constraints for table `codigos_invitacion`
 --
 ALTER TABLE `codigos_invitacion`
   ADD CONSTRAINT `fk_codigo_pulsera` FOREIGN KEY (`id_pulsera`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_codigo_usuario` FOREIGN KEY (`id_usuario_uso`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- Filtros para la tabla `historialpulseras`
+-- Constraints for table `historialpulseras`
 --
 ALTER TABLE `historialpulseras`
   ADD CONSTRAINT `historialpulseras_ibfk_1` FOREIGN KEY (`id_pulsera`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE;
 
 --
--- Filtros para la tabla `usuariosxpulseras`
+-- Constraints for table `historialxpulseras`
+--
+ALTER TABLE `historialxpulseras`
+  ADD CONSTRAINT `historialxpulseras_ibfk_1` FOREIGN KEY (`id_pulsera`) REFERENCES `pulseras` (`id`);
+
+--
+-- Constraints for table `usuariosxpulseras`
 --
 ALTER TABLE `usuariosxpulseras`
   ADD CONSTRAINT `usuariosxpulseras_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
