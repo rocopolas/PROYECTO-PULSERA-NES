@@ -1,6 +1,6 @@
 <?php
 // Conexión a la base de datos
-require_once '../config.php';
+require_once '../config/config.php';
 
 // Solo aceptar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

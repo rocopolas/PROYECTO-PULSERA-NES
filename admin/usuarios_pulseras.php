@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config/config.php';
 
 // Función para obtener todos los usuarios
 function getUsuarios($pdo) {

@@ -3,27 +3,27 @@ session_start();
 
 // Verifica si el usuario está autenticado y es administrador
 if (!isset($_SESSION['username'])) {
-    header("Location: index.html");
+    header("Location: ../index.html");
     exit();
 }
 ?>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="dashboard.php">Panel de Administración</a>
+        <a class="navbar-brand" href="../pulseras/dashboard.php">Panel de Administración</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">Dashboard</a>
+                    <a class="nav-link" href="../pulseras/dashboard.php">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="register.php">Registrar Usuario</a>
+                    <a class="nav-link" href="../auth/register.php">Registrar Usuario</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="register_pulsera.php">Registrar Pulsera</a>
+                    <a class="nav-link" href="../pulseras/register_pulsera.php">Registrar Pulsera</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="usuarios_pulseras.php">Administrar Usuarios y Pulseras</a>
@@ -34,7 +34,7 @@ if (!isset($_SESSION['username'])) {
                     <span class="nav-link text-light">Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?></span>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout.php">Cerrar Sesión</a>
+                    <a class="nav-link" href="../auth/logout.php">Cerrar Sesión</a>
                 </li>
             </ul>
         </div>
