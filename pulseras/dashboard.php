@@ -3,7 +3,7 @@ session_start(); // Inicia la sesión
 
 // Verifica si el usuario está autenticado
 if (!isset($_SESSION['username'])) {
-    header("Location: index.html");
+    header("Location: ../index.html");
     exit();
 }
 
@@ -44,12 +44,12 @@ $es_admin = $es_admin['es_admin'] > 0;
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="colors.css" rel="stylesheet">
+    <link href="../colors.css" rel="stylesheet">
     <script>
         // Función para cargar usuarios y sus permisos
         function cargarUsuarios() {
             $.ajax({
-                url: 'get_usuarios_admin.php',
+                url: '../admin/get_usuarios_admin.php',
                 method: 'GET',
                 data: { id_pulsera: <?php echo $id_pulsera; ?> },
                 dataType: 'json',
@@ -115,7 +115,7 @@ $es_admin = $es_admin['es_admin'] > 0;
             button.prop('disabled', true);
             
             $.ajax({
-                url: 'cambiar_permiso_admin.php',
+                url: '../admin/cambiar_permiso_admin.php',
                 method: 'POST',
                 data: { 
                     id_usuario: userId, 
@@ -148,8 +148,8 @@ $es_admin = $es_admin['es_admin'] > 0;
         // Función para eliminar acceso
         function eliminarPermiso(userId) {
             if (confirm('¿Estás seguro de que quieres eliminar el acceso de este usuario?')) {
-                $.ajax({
-                    url: 'eliminar_acceso.php',
+                    $.ajax({
+                        url: '../admin/eliminar_acceso.php',
                     method: 'POST',
                     data: { 
                         id_usuario: userId, 
@@ -195,7 +195,7 @@ $es_admin = $es_admin['es_admin'] > 0;
         // Función para generar código de invitación
         function generarCodigo() {
             $.ajax({
-                url: 'generar_codigo_invitacion.php',
+                url: '../admin/generar_codigo_invitacion.php',
                 method: 'POST',
                 dataType: 'json',
                 success: function(response) {
@@ -233,7 +233,7 @@ $es_admin = $es_admin['es_admin'] > 0;
             <h1 class="mb-0">Pulsera: <?php echo htmlspecialchars($pulsera['alias']); ?></h1>
             <div class="btn-group">
                 <a href="selector_pulsera.php" class="btn btn-secondary">Cambiar Pulsera</a>
-                <a href="logout.php" class="btn btn-danger">Cerrar Sesión</a>
+                <a href="../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>
         

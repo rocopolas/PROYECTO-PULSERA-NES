@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config/config.php';
 
 try {
     // Borrar todas las filas de la tabla administradorxpulsera

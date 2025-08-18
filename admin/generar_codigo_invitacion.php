@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config/config.php';
 
 // Verificar si es un administrador de la pulsera
 $id_usuario = $_SESSION['user_id'];

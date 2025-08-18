@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config.php';
+require_once '../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $user['contraseña'])) {
                 $_SESSION['username'] = $user['nombre'];
                 $_SESSION['user_id'] = $user['id'];
-                header("Location: selector_pulsera.php");
+                header("Location: ../pulseras/selector_pulsera.php");
                 exit();
             } else {
                 $_SESSION['error'] = "Contraseña incorrecta";
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['error'] = "Error en la base de datos: " . $e->getMessage();
     }
     
-    header("Location: index.html");
+    header("Location: ../index.html");
     exit();
 }
 ?>
