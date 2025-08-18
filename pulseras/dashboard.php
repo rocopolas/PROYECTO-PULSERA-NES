@@ -33,12 +33,7 @@ $pulsera = $result_pulsera->fetch_assoc();
 
 $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
 
-// Verificar si el usuario es administrador de esta pulsera
-$id_usuario = $_SESSION['user_id'];
-$query_admin = "SELECT COUNT(*) as es_admin FROM administradorxpulsera WHERE id_usuario = '$id_usuario' AND id_pulsera = '$id_pulsera'";
-$result_admin = $conexion->query($query_admin);
-$es_admin = $result_admin->fetch_assoc();
-$es_admin = $es_admin['es_admin'] > 0;
+
 
 ?>
 
@@ -78,17 +73,7 @@ $es_admin = $es_admin['es_admin'] > 0;
                                         ${esAdmin ? 'Sí' : 'No'}
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm ${esAdmin ? 'btn-danger' : 'btn-success'} ${usuario.id == <?php echo $id_usuario; ?> ? 'disabled' : ''} btn-admin" 
-                                                data-user-id="${usuario.id}">
-                                            ${esAdmin ? 'Quitar Administrador' : 'Dar Administrador'}
-                                        </button>
-                                        <button class="btn btn-sm btn-danger ${usuario.id == <?php echo $id_usuario; ?> ? 'disabled' : ''} btn-delete" data-user-id="${usuario.id}">
-                                            Eliminar acceso
-                                        </button>
-                                    </div>
-                                </td>
+
                             </tr>
                         `;
                     });
@@ -113,70 +98,7 @@ $es_admin = $es_admin['es_admin'] > 0;
             });
         }
 
-        // Función para cambiar permisos de administrador
-        function cambiarPermiso(userId, esAdmin) {
-            console.log('Cambiando permiso para usuario:', userId, 'esAdmin:', esAdmin);
-            
-            // Deshabilitar el botón mientras se procesa
-            const button = $(`button[data-user-id="${userId}"]`);
-            button.prop('disabled', true);
-            
-            $.ajax({
-                url: '../admin/cambiar_permiso_admin.php',
-                method: 'POST',
-                data: { 
-                    id_usuario: userId, 
-                    id_pulsera: <?php echo $id_pulsera; ?>,
-                    es_admin: esAdmin ? 1 : 0  // 1 para dar administrador, 0 para quitar
-                },
-                dataType: 'json',
-                success: function(response) {
-                    console.log('Respuesta del servidor:', response);
-                    if (response.error) {
-                        alert('Error: ' + response.error);
-                        button.prop('disabled', false);
-                        return;
-                    }
-                    
-                    // Recargar los usuarios para actualizar el estado
-                    cargarUsuarios();
-                    
-                    // Habilitar el botón
-                    button.prop('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error AJAX:', error);
-                    alert('Error al cambiar permisos: ' + error);
-                    button.prop('disabled', false);
-                }
-            });
-        }
-
-        // Función para eliminar acceso
-        function eliminarPermiso(userId) {
-            if (confirm('¿Estás seguro de que quieres eliminar el acceso de este usuario?')) {
-                    $.ajax({
-                        url: '../admin/eliminar_acceso.php',
-                    method: 'POST',
-                    data: { 
-                        id_usuario: userId, 
-                        id_pulsera: <?php echo $id_pulsera; ?>
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.error) {
-                            alert('Error: ' + response.error);
-                        } else {
-                            cargarUsuarios();
-                        }
-                    },
-                    error: function() {
-                        alert('Error al eliminar acceso');
-                    }
-                });
-            }
-        }
-
+        
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
@@ -260,72 +182,7 @@ $es_admin = $es_admin['es_admin'] > 0;
                         <p><strong>Equipo:</strong> <?php echo htmlspecialchars($nombre_equipo); ?></p>
                         <p><strong>Pulsera:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
                         <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
-                        <?php if ($es_admin): ?>
-                            <p class="text-primary"><strong>Eres administrador de este equipo</strong></p>
-                            <div class="d-flex flex-column flex-md-row mt-3">
-                                <button type="button" class="btn btn-secondary mb-2 mb-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
-                                    Generar Código de Invitación
-                                </button>
-                                <button type="button" class="btn btn-primary ms-2 ms-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#adminModal">
-                                    Administrar Usuarios
-                                </button>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal para administrar usuarios -->
-        <div class="modal fade" id="adminModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Administrar Usuarios del Equipo</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="usuariosAdmin" class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Usuario</th>
-                                        <th>Es Administrador</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usuariosList">
-                                    <!-- Los usuarios se cargarán dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="adminError" class="alert alert-danger d-none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal para generar código de invitación -->
-        <div class="modal fade" id="generarCodigoModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Generar Código de Invitación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="codigoGenerado" class="alert alert-info d-none">
-                            <p><strong>Código de invitación generado:</strong> <span id="codigoTexto"></span></p>
-                            <p>Comparte este código con la persona que deseas que vea la pulsera. El código se usará una sola vez y luego se deshabilitará.</p>
-                        </div>
-                        <div id="mensajeError" class="alert alert-danger d-none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        <button type="button" class="btn btn-primary" onclick="generarCodigo()">Generar Código</button>
+                        
                     </div>
                 </div>
             </div>

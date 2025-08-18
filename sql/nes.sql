@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-08-2025 a las 20:59:48
+-- Tiempo de generación: 18-08-2025 a las 21:39:11
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,55 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `nes`
 --
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `administradorxpulsera`
---
-
-CREATE TABLE `administradorxpulsera` (
-  `id_usuario` int(11) NOT NULL,
-  `id_pulsera` int(11) NOT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `administradorxpulsera`
---
-
-INSERT INTO `administradorxpulsera` (`id_usuario`, `id_pulsera`, `fecha_creacion`) VALUES
-(1, 1, '2025-07-07 23:20:25'),
-(2, 2, '2025-07-07 23:24:17');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `codigos_invitacion`
---
-
-CREATE TABLE `codigos_invitacion` (
-  `id` int(11) NOT NULL,
-  `id_pulsera` int(11) NOT NULL,
-  `codigo` varchar(32) NOT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `fecha_uso` timestamp NULL DEFAULT NULL,
-  `id_usuario_uso` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `codigos_invitacion`
---
-
-INSERT INTO `codigos_invitacion` (`id`, `id_pulsera`, `codigo`, `fecha_creacion`, `fecha_uso`, `id_usuario_uso`) VALUES
-(2, 1, '3e6589449be59310e66574ba78bee4a6', '2025-06-23 23:46:01', '2025-06-23 23:50:43', 2),
-(3, 1, '046001224b8a61c7308f28c228d9245e', '2025-06-23 23:52:50', '2025-06-23 23:53:19', 2),
-(4, 1, '12547c4571fc2aa972f874cbbfdb05b4', '2025-06-23 23:54:02', '2025-06-23 23:54:17', 2),
-(5, 1, '36f9c1c2b2bfff8fe692c05a3e6df812', '2025-06-23 23:56:56', '2025-06-23 23:57:09', 2),
-(6, 1, 'b8661a460c4779b978f7bb831af53888', '2025-06-23 23:58:04', '2025-06-23 23:58:20', 2),
-(7, 1, 'ccce3362db1ed078b71c1dd58a2a32fb', '2025-06-26 00:14:04', '2025-06-26 00:14:37', 2),
-(8, 1, '72a399df0ff97a6642ba8cf0ca74c1d0', '2025-06-26 22:03:44', '2025-06-26 22:04:24', 2),
-(9, 1, 'ea7e6cb3c75c1f00df57761d5c8f1e7c', '2025-07-07 23:20:52', '2025-07-07 23:23:50', 2);
 
 -- --------------------------------------------------------
 
@@ -160,7 +111,8 @@ CREATE TABLE `pulserasxequipo` (
 
 INSERT INTO `pulserasxequipo` (`id`, `pulsera_id`, `equipo_id`) VALUES
 (1, 1, 1),
-(2, 3, 1);
+(2, 3, 1),
+(3, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -188,16 +140,6 @@ INSERT INTO `usuarios` (`id`, `nombre`, `contraseña`, `email`, `direccion`, `cr
 --
 -- Índices para tablas volcadas
 --
-
---
--- Indices de la tabla `codigos_invitacion`
---
-ALTER TABLE `codigos_invitacion`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `codigo` (`codigo`),
-  ADD KEY `fk_codigo_pulsera` (`id_pulsera`),
-  ADD KEY `fk_codigo_usuario` (`id_usuario_uso`),
-  ADD KEY `idx_codigo` (`codigo`);
 
 --
 -- Indices de la tabla `equipos`
@@ -241,12 +183,6 @@ ALTER TABLE `usuarios`
 --
 
 --
--- AUTO_INCREMENT de la tabla `codigos_invitacion`
---
-ALTER TABLE `codigos_invitacion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-
---
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
@@ -268,7 +204,7 @@ ALTER TABLE `pulseras`
 -- AUTO_INCREMENT de la tabla `pulserasxequipo`
 --
 ALTER TABLE `pulserasxequipo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -279,13 +215,6 @@ ALTER TABLE `usuarios`
 --
 -- Restricciones para tablas volcadas
 --
-
---
--- Filtros para la tabla `codigos_invitacion`
---
-ALTER TABLE `codigos_invitacion`
-  ADD CONSTRAINT `fk_codigo_pulsera` FOREIGN KEY (`id_pulsera`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_codigo_usuario` FOREIGN KEY (`id_usuario_uso`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `historialxpulseras`
