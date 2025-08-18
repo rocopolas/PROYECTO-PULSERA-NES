@@ -28,9 +28,9 @@ if (!isset($_SESSION['username'])) {
                 <li class="nav-item">
                     <a class="nav-link" href="registrar_equipo.php">Registrar Equipo</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="usuarios_pulseras.php">Administrar Usuarios y Pulseras</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="asociar_pulsera_equipo.php">Asociar Pulsera a Equipo</a>
+                    </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">

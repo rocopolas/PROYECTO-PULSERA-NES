@@ -8,31 +8,21 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Obtener los equipos y pulseras del usuario
-$stmt = $pdo->prepare("
-    SELECT e.id AS equipo_id, e.nombre_equipo, p.id AS id_pulsera, p.alias, p.funcionamiento
-    FROM equipos e
-    JOIN pulseras p ON p.equipo_id = e.id
-    WHERE e.responsable_equipo = ?
-    ORDER BY e.nombre_equipo, p.alias");
+// Obtener todos los equipos donde el usuario es responsable
+$stmt = $pdo->prepare("SELECT id, nombre_equipo FROM equipos WHERE responsable_equipo = ? ORDER BY nombre_equipo");
 $stmt->execute([$_SESSION['user_id']]);
-$filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$equipos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$equipos = [];
-foreach ($filas as $fila) {
-    $eid = $fila['equipo_id'];
-    if (!isset($equipos[$eid])) {
-        $equipos[$eid] = [
-            'nombre_equipo' => $fila['nombre_equipo'],
-            'pulseras' => []
-        ];
-    }
-    $equipos[$eid]['pulseras'][] = [
-        'id_pulsera' => $fila['id_pulsera'],
-        'alias' => $fila['alias'],
-        'funcionamiento' => $fila['funcionamiento']
-    ];
+// Para cada equipo, obtener sus pulseras
+$equiposTemp = []; // Array temporal para almacenar los equipos procesados
+foreach ($equipos as $equipo) {
+    $eid = $equipo['id'];
+    $stmt_p = $pdo->prepare("SELECT p.id AS id_pulsera, p.alias, p.funcionamiento FROM pulseras p JOIN pulserasxequipo px ON px.pulsera_id = p.id WHERE px.equipo_id = ? ORDER BY p.alias");
+    $stmt_p->execute([$eid]);
+    $equipo['pulseras'] = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
+    $equiposTemp[] = $equipo;
 }
+$equipos = $equiposTemp; // Reemplazar el array original con el procesado
 
 // Si se selecciona una pulsera, redirigir al dashboard
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
@@ -102,26 +92,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <form method="POST" class="p-4 border rounded bg-white shadow-sm">
-                      <div class="mb-4">
-                          <h3 class="mb-3">Equipos disponibles</h3>
-                          <?php foreach ($equipos as $id_equipo => $equipo): ?>
-                              <h5 class="mt-3 mb-2"><?php echo htmlspecialchars($equipo['nombre_equipo']); ?></h5>
-                              <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-3">
-                                  <?php foreach ($equipo['pulseras'] as $pulsera): ?>
-                                      <div class="col">
-                                          <button type="submit"
-                                                  name="seleccion"
-                                                  value="<?php echo $id_equipo . ':' . $pulsera['id_pulsera']; ?>"
-                                                  class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
-                                              <div class="fw-bold mb-2"><?php echo htmlspecialchars($pulsera['alias']); ?></div>
-                                              <div class=""><?php echo htmlspecialchars($pulsera['funcionamiento']); ?></div>
-                                          </button>
-                                      </div>
-                                  <?php endforeach; ?>
-                              </div>
-                          <?php endforeach; ?>
+                    <div class="mb-4">
+                        <h3 class="mb-3">Equipos disponibles</h3>
+                        <?php 
+                        foreach ($equipos as $equipo):
+                        ?>
+                            <div class="equipo-container mb-4">
+                                <h5 class="mt-3 mb-2">
+                                    <?php echo htmlspecialchars($equipo['nombre_equipo']); ?>
+                                </h5>
+                                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                                    <?php if (!empty($equipo['pulseras'])): ?>
+                                        <?php foreach ($equipo['pulseras'] as $pulsera): ?>
+                                            <div class="col">
+                                                <button type="submit"
+                                                        name="seleccion"
+                                                        value="<?php echo $equipo['id'] . ':' . $pulsera['id_pulsera']; ?>"
+                                                        class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
+                                                    <div class="fw-bold mb-2"><?php echo htmlspecialchars($pulsera['alias']); ?></div>
+                                                    <div class=""><?php echo htmlspecialchars($pulsera['funcionamiento']); ?></div>
+                                                </button>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="col">
+                                            <div class="alert alert-warning w-100">No hay pulseras asociadas a este equipo.</div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
 
                       </div>
+                    <!-- Botones para registrar pulsera o usar código de invitación 
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
                             Registrar Pulsera
@@ -130,12 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
                             Usar Código de Invitación
                         </button>
                     </div>
+                    -->
                 </form>
             </div>
         </div>
     </div>
-
-    <!-- Modal para registrar pulsera -->
+                
+    <!-- Modal para registrar pulsera 
     <div class="modal fade" id="registerBraceletModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -157,8 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
             </div>
         </div>
     </div>
-
-    <!-- Modal para usar código de invitación -->
+    -->
+    <!-- Modal para usar código de invitación 
     <div class="modal fade" id="codigoInvitacionModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -180,7 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
             </div>
         </div>
     </div>
-
+    -->
+    <!--  
     <script>
         function registerBracelet() {
             const idPulsera = document.getElementById('id_pulsera').value;
@@ -260,5 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
             });
         }
     </script>
+    -->
 </body>
 </html>

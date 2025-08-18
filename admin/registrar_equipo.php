@@ -8,7 +8,7 @@ try {
     $usuarios = $usuariosStmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Pulseras que aún no están asociadas a un equipo
-    $pulserasStmt = $pdo->query("SELECT id, alias FROM pulseras WHERE equipo_id IS NULL");
+    $pulserasStmt = $pdo->query("SELECT id, alias FROM pulseras WHERE id NOT IN (SELECT pulsera_id FROM pulserasxequipo)");
 
     $pulseras = $pulserasStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$nombre, $responsable]);
             $equipo_id = $pdo->lastInsertId();
 
-            $updateStmt = $pdo->prepare("UPDATE pulseras SET equipo_id = ? WHERE id = ?");
+            $updateStmt = $pdo->prepare("UPDATE pulseras SET id = ? WHERE id = ?");
             foreach ($pulsera_ids as $pid) {
                 $updateStmt->execute([$equipo_id, $pid]);
             }
@@ -80,12 +80,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mb-3">
             <label for="pulsera_ids" class="form-label">Pulseras</label>
-            <select id="pulsera_ids" name="pulsera_ids[]" class="form-select" multiple required>
+            <?php if (empty($pulseras)): ?>
+                <div class="alert alert-warning">No hay pulseras disponibles para asociar.</div>
+            <?php endif; ?>
 
+            <select id="pulsera_ids" name="pulsera_ids[]" class="form-select" multiple required>
                 <?php foreach ($pulseras as $pulsera): ?>
                     <option value="<?= $pulsera['id']; ?>"><?= htmlspecialchars($pulsera['alias']); ?></option>
                 <?php endforeach; ?>
             </select>
+
             <div class="form-text">Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar varias pulseras.</div>
         </div>
         <button type="submit" class="btn btn-primary">Registrar</button>
