@@ -21,24 +21,6 @@ Este repositorio contiene una plataforma web y un ejemplo de firmware para gesti
 - Servidor web (Apache, Nginx o el servidor embebido de PHP).
 - Opcional: **Arduino IDE** y un ESP32/ESP8266 para ejecutar el ejemplo de firmware.
 
-## Instalación
-
-1. Clona este repositorio en el directorio público de tu servidor web:
-   ```bash
-   git clone <url-del-repo>
-   cd PROYECTO-PULSERA-NES
-   ```
-2. Configura la conexión a la base de datos editando `config/config.php` con tus credenciales.
-3. Importa la estructura de la base de datos:
-   ```bash
-   mysql -u <usuario> -p < sql/nes.sql
-   ```
-4. Inicia el servidor web. Para pruebas locales puedes usar el servidor integrado de PHP:
-   ```bash
-   php -S localhost:8000 -t .
-   ```
-5. Accede a `http://localhost:8000` y crea un usuario desde `auth/register.php` o utiliza un usuario existente.
-
 ## Uso de la plataforma
 
 1. **Inicio de sesión:** navega a `index.html`, introduce tus credenciales y accede al panel.
@@ -64,16 +46,3 @@ El directorio `arduinoide/` incluye un sketch para ESP32 que envía un POST al w
 2. Ajusta `ssid`, `password` y `webhookUrl` a tu red y URL de servidor.
 3. Compila y sube el sketch a tu dispositivo.
 4. Cada pulsación del botón enviará un evento que aparecerá en el historial del dashboard.
-
-## Personalización de estilos
-
-La interfaz utiliza `colors.css` para definir colores y fuentes. Puedes modificar los valores en `:root` para adaptar la paleta de colores a tus necesidades.
-
-## Contribuciones
-
-Las contribuciones son bienvenidas. Abre un _issue_ o envía un _pull request_ con tus mejoras.
-
-## Licencia
-
-Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo `LICENSE` si está disponible.
-
