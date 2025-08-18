@@ -7,8 +7,8 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Verifica si se ha seleccionado una pulsera
-if (!isset($_SESSION['selected_pulsera'])) {
+// Verifica si se ha seleccionado un equipo
+if (!isset($_SESSION['selected_equipo'])) {
     header("Location: selector_pulsera.php");
     exit();
 }
@@ -20,11 +20,15 @@ if ($conexion->connect_error) {
     die("Error de conexión: " . $conexion->connect_error);
 }
 
-// Obtener información de la pulsera seleccionada
-$id_pulsera = $_SESSION['selected_pulsera'];
-$query_pulsera = "SELECT alias, funcionamiento FROM pulseras WHERE id = '$id_pulsera'";
+// Obtener información del equipo seleccionado y su pulsera
+$id_equipo = $_SESSION['selected_equipo'];
+$query_pulsera = "SELECT p.id AS id_pulsera, p.alias, p.funcionamiento, e.nombre_equipo FROM equipos e JOIN pulseras p ON e.pulsera_id = p.id WHERE e.id = '$id_equipo'";
 $result_pulsera = $conexion->query($query_pulsera);
 $pulsera = $result_pulsera->fetch_assoc();
+$id_pulsera = $pulsera['id_pulsera'];
+// Guardar id de pulsera en la sesión para compatibilidad
+$_SESSION['selected_pulsera'] = $id_pulsera;
+$nombre_equipo = $pulsera['nombre_equipo'];
 
 // Verificar si el usuario es administrador de esta pulsera
 $id_usuario = $_SESSION['user_id'];
@@ -230,9 +234,9 @@ $es_admin = $es_admin['es_admin'] > 0;
 <body class="">
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0">Pulsera: <?php echo htmlspecialchars($pulsera['alias']); ?></h1>
+            <h1 class="mb-0">Equipo: <?php echo htmlspecialchars($nombre_equipo); ?></h1>
             <div class="btn-group">
-                <a href="selector_pulsera.php" class="btn btn-secondary">Cambiar Pulsera</a>
+                <a href="selector_pulsera.php" class="btn btn-secondary">Cambiar Equipo</a>
                 <a href="../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>
@@ -249,11 +253,12 @@ $es_admin = $es_admin['es_admin'] > 0;
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Información de la Pulsera</h5>
-                        <p><strong>Alias:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
+                        <h5 class="card-title">Información del Equipo</h5>
+                        <p><strong>Equipo:</strong> <?php echo htmlspecialchars($nombre_equipo); ?></p>
+                        <p><strong>Pulsera:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
                         <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
                         <?php if ($es_admin): ?>
-                            <p class="text-primary"><strong>Eres administrador de esta pulsera</strong></p>
+                            <p class="text-primary"><strong>Eres administrador de este equipo</strong></p>
                             <div class="d-flex flex-column flex-md-row mt-3">
                                 <button type="button" class="btn btn-secondary mb-2 mb-md-0 mx-2" data-bs-toggle="modal" data-bs-target="#generarCodigoModal">
                                     Generar Código de Invitación
@@ -273,7 +278,7 @@ $es_admin = $es_admin['es_admin'] > 0;
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Administrar Usuarios de la Pulsera</h5>
+                        <h5 class="modal-title">Administrar Usuarios del Equipo</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">

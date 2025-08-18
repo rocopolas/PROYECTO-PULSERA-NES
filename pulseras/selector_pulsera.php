@@ -8,21 +8,27 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Obtener las pulseras del usuario
+// Obtener los equipos del usuario
 $stmt = $pdo->prepare("
-    SELECT p.id, p.alias, p.funcionamiento 
-    FROM pulseras p 
-    JOIN usuariosxpulseras up ON p.id = up.id_pulsera 
-    WHERE up.id_usuario = ?
-    ORDER BY p.alias");
+    SELECT e.id, e.nombre_equipo, p.funcionamiento, p.id AS id_pulsera
+    FROM equipos e
+    JOIN pulseras p ON e.pulsera_id = p.id
+    WHERE e.responsable_equipo = ?
+    ORDER BY e.nombre_equipo");
 $stmt->execute([$_SESSION['user_id']]);
-$pulseras = $stmt->fetchAll();
+$equipos = $stmt->fetchAll();
 
-// Si se selecciona una pulsera, redirigir al dashboard
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
-    $_SESSION['selected_pulsera'] = $_POST['id_pulsera'];
-    header("Location: dashboard.php");
-    exit();
+// Si se selecciona un equipo, redirigir al dashboard
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_equipo'])) {
+    $stmt = $pdo->prepare("SELECT pulsera_id FROM equipos WHERE id = ?");
+    $stmt->execute([$_POST['id_equipo']]);
+    $idPulsera = $stmt->fetchColumn();
+    if ($idPulsera) {
+        $_SESSION['selected_equipo'] = $_POST['id_equipo'];
+        $_SESSION['selected_pulsera'] = $idPulsera; // compatibilidad
+        header("Location: dashboard.php");
+        exit();
+    }
 }
 ?>
 
@@ -31,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Pulsera</title>
+    <title>Seleccionar Equipo</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -82,22 +88,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <form method="POST" class="p-4 border rounded bg-white shadow-sm">
-                    <div class="mb-4">
-                        <h3 class="mb-3">Pulseras disponibles</h3>
-                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-                            <?php foreach ($pulseras as $pulsera): ?>
-                                <div class="col">
-                                    <button type="submit" 
-                                            name="id_pulsera" 
-                                            value="<?php echo $pulsera['id']; ?>" 
-                                            class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
-                                        <div class="fw-bold mb-2"><?php echo htmlspecialchars($pulsera['alias']); ?></div>
-                                        <div class=""><?php echo htmlspecialchars($pulsera['funcionamiento']); ?></div>
-                                    </button>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
+                      <div class="mb-4">
+                          <h3 class="mb-3">Equipos disponibles</h3>
+                          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                              <?php foreach ($equipos as $equipo): ?>
+                                  <div class="col">
+                                      <button type="submit"
+                                              name="id_equipo"
+                                              value="<?php echo $equipo['id']; ?>"
+                                              class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
+                                          <div class="fw-bold mb-2"><?php echo htmlspecialchars($equipo['nombre_equipo']); ?></div>
+                                          <div class=""><?php echo htmlspecialchars($equipo['funcionamiento']); ?></div>
+                                      </button>
+                                  </div>
+                              <?php endforeach; ?>
+                          </div>
+                      </div>
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
                             Registrar Pulsera
