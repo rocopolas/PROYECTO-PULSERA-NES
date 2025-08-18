@@ -26,6 +26,9 @@ if (!isset($_SESSION['username'])) {
                     <a class="nav-link" href="../pulseras/register_pulsera.php">Registrar Pulsera</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="registrar_equipo.php">Registrar Equipo</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="usuarios_pulseras.php">Administrar Usuarios y Pulseras</a>
                 </li>
             </ul>
