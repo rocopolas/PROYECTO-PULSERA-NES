@@ -9,6 +9,7 @@ try {
 
     // Pulseras que aún no están asociadas a un equipo
     $pulserasStmt = $pdo->query("SELECT id, alias FROM pulseras WHERE equipo_id IS NULL");
+
     $pulseras = $pulserasStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Error al obtener datos: " . $e->getMessage());
@@ -17,6 +18,7 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre_equipo'] ?? '';
     $responsable = $_POST['responsable'] ?? '';
+
     $pulsera_ids = $_POST['pulsera_ids'] ?? [];
 
     if ($nombre && $responsable && !empty($pulsera_ids)) {
@@ -36,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message'] = 'Equipo registrado exitosamente';
         } catch (PDOException $e) {
             $pdo->rollBack();
+          
             $_SESSION['error'] = 'Error al registrar el equipo: ' . $e->getMessage();
         }
     } else {
@@ -78,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
             <label for="pulsera_ids" class="form-label">Pulseras</label>
             <select id="pulsera_ids" name="pulsera_ids[]" class="form-select" multiple required>
+
                 <?php foreach ($pulseras as $pulsera): ?>
                     <option value="<?= $pulsera['id']; ?>"><?= htmlspecialchars($pulsera['alias']); ?></option>
                 <?php endforeach; ?>

@@ -26,6 +26,7 @@ $id_pulsera = $_SESSION['selected_pulsera'];
 $query_pulsera = "SELECT p.id AS id_pulsera, p.alias, p.funcionamiento, e.nombre_equipo FROM pulseras p JOIN equipos e ON p.equipo_id = e.id WHERE p.id = '$id_pulsera' AND e.id = '$id_equipo'";
 $result_pulsera = $conexion->query($query_pulsera);
 $pulsera = $result_pulsera->fetch_assoc();
+
 $nombre_equipo = $pulsera['nombre_equipo'];
 
 // Verificar si el usuario es administrador de esta pulsera
