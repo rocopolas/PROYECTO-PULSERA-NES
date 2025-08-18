@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_pulsera'])) {
             }
 
             $.ajax({
-                url: 'register_pulsera_manual.php',
+                url: 'register_pulser_manual.php',
                 method: 'POST',
                 data: { id_pulsera: idPulsera },
                 dataType: 'json',
