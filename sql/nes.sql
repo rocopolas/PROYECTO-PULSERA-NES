@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-08-2025 a las 21:39:11
+-- Tiempo de generación: 20-08-2025 a las 04:12:51
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -38,8 +38,8 @@ CREATE TABLE `equipos` (
 --
 
 INSERT INTO `equipos` (`id`, `nombre_equipo`, `responsable_equipo`) VALUES
-(1, 'Equipo A', 1),
-(2, 'Equipo B', 1);
+(1, 'A', 1),
+(2, 'B', 1);
 
 -- --------------------------------------------------------
 
@@ -117,6 +117,26 @@ INSERT INTO `pulserasxequipo` (`id`, `pulsera_id`, `equipo_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `pulseras_heartbeat`
+--
+
+CREATE TABLE `pulseras_heartbeat` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `pulsera_id` int(11) NOT NULL,
+  `received_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `battery_mv` smallint(5) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pulseras_heartbeat`
+--
+
+INSERT INTO `pulseras_heartbeat` (`id`, `pulsera_id`, `received_at`, `battery_mv`) VALUES
+(3, 1, '2025-08-19 23:11:44', 3740);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios`
 --
 
@@ -171,6 +191,13 @@ ALTER TABLE `pulserasxequipo`
   ADD KEY `equipo_id` (`equipo_id`);
 
 --
+-- Indices de la tabla `pulseras_heartbeat`
+--
+ALTER TABLE `pulseras_heartbeat`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_pulsera_time` (`pulsera_id`,`received_at`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -207,6 +234,12 @@ ALTER TABLE `pulserasxequipo`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT de la tabla `pulseras_heartbeat`
+--
+ALTER TABLE `pulseras_heartbeat`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -228,6 +261,12 @@ ALTER TABLE `historialxpulseras`
 ALTER TABLE `pulserasxequipo`
   ADD CONSTRAINT `pulserasxequipo_ibfk_1` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`),
   ADD CONSTRAINT `pulserasxequipo_ibfk_2` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
+
+--
+-- Filtros para la tabla `pulseras_heartbeat`
+--
+ALTER TABLE `pulseras_heartbeat`
+  ADD CONSTRAINT `fk_hb_pulsera` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

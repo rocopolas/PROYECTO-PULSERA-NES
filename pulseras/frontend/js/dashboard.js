@@ -1,27 +1,70 @@
-// Función para obtener el estado del botón desde la base de datos
-function actualizarEstado() {
-    $.ajax({
-        url: '../backend/get_estado.php',
+document.addEventListener('DOMContentLoaded', () => {
+  const ENDPOINT = '../backend/get_estado.php'; // <--- AJUSTA ESTA RUTA
+  const el = document.getElementById('estado-boton');
+
+  if (!el) {
+    console.error('No existe #estado-boton en el DOM');
+    return;
+  }
+
+  function setClass(state) {
+    el.classList.remove('text-primary','text-success','text-danger','text-muted');
+    if (state === 'online') el.classList.add('text-success');
+    else if (state === 'offline') el.classList.add('text-danger');
+    else el.classList.add('text-muted');
+  }
+
+  function fmtLastSeen(ts) {
+    if (!ts) return '—';
+    const d = new Date((ts+'').replace(' ', 'T'));
+    return isNaN(d) ? ts : d.toLocaleString();
+  }
+  const fmtMinutes = m => (m==null || isNaN(m)) ? '—' : `${m} min`;
+  const fmtBattery = mv => (mv==null) ? '—' : `${(mv/1000).toFixed(2)} V (${mv} mV)`;
+
+  async function cargarEstado() {
+    try {
+      const res = await fetch(ENDPOINT, {
         method: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.error) {
-                $('#estado-boton').text('Error: ' + response.error);
-            } else {
-                const estado = response.estado;
-                $('#estado-boton').text(estado.charAt(0).toUpperCase() + estado.slice(1));
-            }
-        },
-        error: function() {
-            $('#estado-boton').text('Error al obtener el estado del botón.');
-        }
-    });
-}
+        credentials: 'include',           // incluye cookies de sesión
+        headers: { 'Accept': 'application/json' }
+      });
 
-// Actualiza el estado cada 1 segundo
-setInterval(actualizarEstado, 1000);
+      const raw = await res.text();       // leemos como texto primero
+      let data;
+      try { data = JSON.parse(raw); }     // intentamos parsear a JSON
+      catch {
+        setClass('error');
+        el.innerHTML = `<span class="fw-semibold">Error</span><br>
+                        <small>Respuesta no es JSON válido:</small><br>
+                        <code style="white-space:pre-wrap">${raw.slice(0,400)}</code>`;
+        console.error('Respuesta cruda:', raw);
+        return;
+      }
 
-// Llama a la función al cargar la página
-$(document).ready(function() {
-    actualizarEstado();
+      if (!res.ok || data.error) {
+        setClass('error');
+        el.innerHTML = `<span class="fw-semibold">Error</span><br>
+                        <small>${data.error || 'No se pudo obtener el estado'}</small>`;
+        console.error('Error backend:', data);
+        return;
+      }
+
+      const estado = (data.estado || 'sin datos').toLowerCase();
+      setClass(estado);
+      el.innerHTML = `
+        <span class="fw-semibold text-uppercase">${estado}</span>
+        <br><small>Último latido: ${fmtLastSeen(data.last_seen)} (${fmtMinutes(data.minutes_since)})</small>
+        <br><small>Batería: ${fmtBattery(data.battery_mv)}</small>
+      `;
+    } catch (e) {
+      setClass('error');
+      el.innerHTML = `<span class="fw-semibold">Error</span><br>
+                      <small>No se pudo conectar con el servidor</small>`;
+      console.error(e);
+    }
+  }
+
+  cargarEstado();
+  setInterval(cargarEstado, 30000);
 });

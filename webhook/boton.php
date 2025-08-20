@@ -2,6 +2,9 @@
 // Conexión a la base de datos
 require_once '../config/config.php';
 
+header('Content-Type: application/json; charset=utf-8');
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 // Solo aceptar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

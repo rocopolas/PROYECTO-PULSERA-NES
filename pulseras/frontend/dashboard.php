@@ -35,13 +35,13 @@ ob_start();
             <div class="col mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title mb-4">Estado Actual</h5>
-                        <div class="d-flex flex-column align-items-center justify-content-center h-75">
-                            <p id="estado-boton" class="text-center text-primary mb-0">Cargando estado del botón...</p>
-                        </div>
+                    <h5 class="card-title mb-4">Estado Actual</h5>
+                    <div class="d-flex flex-column align-items-center justify-content-center h-75">
+                        <p id="estado-boton" class="text-center text-primary mb-0">Cargando estado del botón...</p>
+                    </div>
                     </div>
                 </div>
-            </div>
+                </div>  
             <div class="col mb-4">
                 <div class="card h-100">
                     <div class="card-body">
