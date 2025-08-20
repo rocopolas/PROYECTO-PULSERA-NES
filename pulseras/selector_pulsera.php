@@ -1,29 +1,29 @@
 <?php
-session_start();
-require_once '../config/config.php';
+require_once '../config/db_connection.php';
+require_once '../auth/session_checks.php';
+require_once 'pulsera_functions.php';
 
-// Verificar si el usuario está autenticado
-if (!isset($_SESSION['username'])) {
-    header("Location: ../index.html");
-    exit();
-}
+// Verificar autenticación
+checkAuth();
+
+// Obtener conexión a la base de datos
+$conexion = getConnection();
+
+$pageTitle = 'Seleccionar Equipo';
+$additionalHeadContent = '<script src="js/selector_pulsera.js"></script>';
+
+ob_start();
 
 // Obtener todos los equipos donde el usuario es responsable
-$stmt = $pdo->prepare("SELECT id, nombre_equipo FROM equipos WHERE responsable_equipo = ? ORDER BY nombre_equipo");
-$stmt->execute([$_SESSION['user_id']]);
-$equipos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$equipos = getEquiposUsuario($conexion, $_SESSION['user_id']);
 
 // Para cada equipo, obtener sus pulseras
-$equiposTemp = []; // Array temporal para almacenar los equipos procesados
+$equiposTemp = [];
 foreach ($equipos as $equipo) {
-    $eid = $equipo['id'];
-    $stmt_p = $pdo->prepare("SELECT p.id AS id_pulsera, p.alias, p.funcionamiento FROM pulseras p JOIN pulserasxequipo px ON px.pulsera_id = p.id WHERE px.equipo_id = ? ORDER BY p.alias");
-    $stmt_p->execute([$eid]);
-    $equipo['pulseras'] = $stmt_p->fetchAll(PDO::FETCH_ASSOC);
+    $equipo['pulseras'] = getPulserasEquipo($conexion, $equipo['id']);
     $equiposTemp[] = $equipo;
-}
 $equipos = $equiposTemp; // Reemplazar el array original con el procesado
-
+}
 // Si se selecciona una pulsera, redirigir al dashboard
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
     $parts = explode(':', $_POST['seleccion']);
@@ -35,51 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
     }
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Equipo</title>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function registerBracelet() {
-            const idPulsera = document.getElementById('id_pulsera').value;
-            const messageBox = document.getElementById('messageBox');
-            
-            if (!idPulsera) {
-                messageBox.className = 'alert alert-danger d-block';
-                messageBox.textContent = 'Por favor ingrese el ID de la pulsera';
-                return;
-            }
-
-            $.ajax({
-                url: 'register_pulser_manual.php',
-                method: 'POST',
-                data: { id_pulsera: idPulsera },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        messageBox.className = 'alert alert-success d-block';
-                        messageBox.textContent = response.message;
-                        document.getElementById('id_pulsera').value = '';
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        messageBox.className = 'alert alert-danger d-block';
-                        messageBox.textContent = response.message;
-                    }
-                },
-                error: function() {
-                    messageBox.className = 'alert alert-danger d-block';
-                    messageBox.textContent = 'Error al registrar la pulsera. Por favor intente nuevamente.';
-                }
-            });
-        }
-    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../colors.css" rel="stylesheet">
 </head>
@@ -138,133 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
             </div>
         </div>
     </div>
-                
-    <!-- Modal para registrar pulsera 
-    <div class="modal fade" id="registerBraceletModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Pulsera</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="id_pulsera" class="form-label">ID de la Pulsera</label>
-                        <input type="text" class="form-control" id="id_pulsera" required>
-                    </div>
-                    <div id="messageBox" class="alert d-none"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="registerBracelet()">Registrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    -->
-    <!-- Modal para usar código de invitación 
-    <div class="modal fade" id="codigoInvitacionModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Usar Código de Invitación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="codigo" class="form-label">Código de Invitación:</label>
-                        <input type="text" class="form-control" id="codigo" required>
-                        <div id="mensajeCodigo" class="alert alert-danger d-none mt-2"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="usarCodigo()">Usar Código</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    -->
-    <!--  
-    <script>
-        function registerBracelet() {
-            const idPulsera = document.getElementById('id_pulsera').value;
-            const messageBox = document.getElementById('messageBox');
-            
-            if (!idPulsera) {
-                messageBox.className = 'alert alert-danger d-block';
-                messageBox.textContent = 'Por favor ingrese el ID de la pulsera';
-                return;
-            }
 
-            $.ajax({
-                url: 'register_pulser_manual.php',
-                method: 'POST',
-                data: { id_pulsera: idPulsera },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        messageBox.className = 'alert alert-success d-block';
-                        messageBox.textContent = response.message;
-                        document.getElementById('id_pulsera').value = '';
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        messageBox.className = 'alert alert-danger d-block';
-                        messageBox.textContent = response.message;
-                    }
-                },
-                error: function() {
-                    messageBox.className = 'alert alert-danger d-block';
-                    messageBox.textContent = 'Error al registrar la pulsera. Por favor intente nuevamente.';
-                }
-            });
-        }
-        function usarCodigo() {
-            const codigo = $('#codigo').val();
-            if (!codigo) {
-                $('#mensajeCodigo').removeClass('d-none');
-                $('#mensajeCodigo').text('Por favor ingrese un código de invitación');
-                return;
-            }
-
-            $.ajax({
-                url: 'validar_codigo_invitacion.php',
-                method: 'POST',
-                data: { codigo: codigo },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Mostrar mensaje de éxito
-                        $('#mensajeCodigo').removeClass('d-none');
-                        $('#mensajeCodigo').removeClass('alert-danger');
-                        $('#mensajeCodigo').addClass('alert-success');
-                        $('#mensajeCodigo').text(response.message);
-                        
-                        // Guardar la pulsera en la sesión y redirigir después de un breve delay
-                        setTimeout(function() {
-                            $.ajax({
-                                url: 'set_pulsera.php',
-                                method: 'POST',
-                                data: { id_pulsera: response.id_pulsera },
-                                success: function() {
-                                    window.location.href = 'dashboard.php';
-                                }
-                            });
-                        }, 1000);
-                    } else {
-                        $('#mensajeCodigo').removeClass('d-none');
-                        $('#mensajeCodigo').text(response.message);
-                    }
-                },
-                error: function() {
-                    $('#mensajeCodigo').removeClass('d-none');
-                    $('#mensajeCodigo').text('Error al validar el código de invitación');
-                }
-            });
-        }
-    </script>
-    -->
-</body>
-</html>
+<?php
+$content = ob_get_clean();
+require_once 'templates/layout.php';
+?>
