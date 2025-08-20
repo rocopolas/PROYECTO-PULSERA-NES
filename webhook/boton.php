@@ -45,4 +45,4 @@ try {
 ?>
 
 // Ejemplo de uso:
-// curl -X POST http://localhost/webhook/webhook.php -H "Content-Type: application/json" -d '{"id_pulsera": 1}'
+// curl -X POST http://localhost/webhook/boton.php -H "Content-Type: application/json" -d '{"id_pulsera": 1}'
