@@ -124,15 +124,17 @@ CREATE TABLE `pulseras_heartbeat` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `pulsera_id` int(11) NOT NULL,
   `received_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `battery_mv` smallint(5) UNSIGNED DEFAULT NULL
+  `battery_mv` smallint(5) UNSIGNED DEFAULT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `pulseras_heartbeat`
 --
 
-INSERT INTO `pulseras_heartbeat` (`id`, `pulsera_id`, `received_at`, `battery_mv`) VALUES
-(3, 1, '2025-08-19 23:11:44', 3740);
+INSERT INTO `pulseras_heartbeat` (`id`, `pulsera_id`, `received_at`, `battery_mv`, `latitude`, `longitude`) VALUES
+(3, 1, '2025-08-19 23:11:44', 3740, NULL, NULL);
 
 -- --------------------------------------------------------
 

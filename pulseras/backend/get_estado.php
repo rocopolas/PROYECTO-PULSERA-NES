@@ -24,7 +24,7 @@ $conn->set_charset('utf8mb4');
 
 // 4) Traer el último latido de esa pulsera
 $sql = "
-    SELECT received_at, battery_mv
+    SELECT received_at, battery_mv, latitude, longitude
     FROM pulseras_heartbeat
     WHERE pulsera_id = ?
     ORDER BY received_at DESC
@@ -44,6 +44,8 @@ $result = $stmt->get_result();
 if ($row = $result->fetch_assoc()) {
     $last_seen   = $row['received_at']; // 'Y-m-d H:i:s'
     $battery_mv  = is_null($row['battery_mv']) ? null : intval($row['battery_mv']);
+    $latitude    = is_null($row['latitude']) ? null : (float)$row['latitude'];
+    $longitude   = is_null($row['longitude']) ? null : (float)$row['longitude'];
 
     // 5) Calcular minutos transcurridos y estado
     $now = new DateTime('now');
@@ -59,7 +61,9 @@ if ($row = $result->fetch_assoc()) {
         'last_seen'      => $last_seen,
         'battery_mv'     => $battery_mv,
         'minutes_since'  => $minutes_since,
-        'estado'         => $estado
+        'estado'         => $estado,
+        'latitude'       => $latitude,
+        'longitude'      => $longitude
     ]);
 } else {
     // No hay latidos registrados para esa pulsera
@@ -69,7 +73,9 @@ if ($row = $result->fetch_assoc()) {
         'last_seen'     => null,
         'battery_mv'    => null,
         'minutes_since' => null,
-        'estado'        => 'sin datos'
+        'estado'        => 'sin datos',
+        'latitude'      => null,
+        'longitude'     => null
     ]);
 }
 
