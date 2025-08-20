@@ -16,9 +16,7 @@ $id_pulsera = $_SESSION['selected_pulsera'];
 $pulsera = getPulseraInfo($conexion, $id_pulsera);
 
 $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
-?>
 
-<?php
 // Definir contenido adicional para el header
 $additionalHeadContent = '<script src="js/dashboard.js"></script>';
 
@@ -144,7 +142,8 @@ ob_start();
             <p class="text-center text-danger">No hay registros disponibles para este usuario.</p>
         <?php endif; ?>
         
-    <?php
+
+<?php
     // Obtener el contenido del buffer y limpiarlo
     $content = ob_get_clean();
     
@@ -153,4 +152,4 @@ ob_start();
     
     // Cerrar la conexión
     $conexion->close();
-    ?>
+?>
