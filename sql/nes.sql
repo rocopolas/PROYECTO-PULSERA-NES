@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-08-2025 a las 04:12:51
+-- Tiempo de generación: 20-08-2025 a las 18:15:00
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -134,7 +134,9 @@ CREATE TABLE `pulseras_heartbeat` (
 --
 
 INSERT INTO `pulseras_heartbeat` (`id`, `pulsera_id`, `received_at`, `battery_mv`, `latitude`, `longitude`) VALUES
-(3, 1, '2025-08-19 23:11:44', 3740, NULL, NULL);
+(3, 1, '2025-08-19 23:11:44', 3740, NULL, NULL),
+(4, 1, '2025-08-20 13:05:20', 3700, -34.6100000, -58.3800000),
+(5, 1, '2025-08-20 13:07:52', 3700, -34.5898699, -58.5804856);
 
 -- --------------------------------------------------------
 
@@ -239,7 +241,7 @@ ALTER TABLE `pulserasxequipo`
 -- AUTO_INCREMENT de la tabla `pulseras_heartbeat`
 --
 ALTER TABLE `pulseras_heartbeat`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`

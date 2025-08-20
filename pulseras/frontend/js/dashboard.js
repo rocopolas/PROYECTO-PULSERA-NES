@@ -16,10 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fmtLastSeen(ts) {
-    if (!ts) return '—';
-    const d = new Date((ts+'').replace(' ', 'T'));
-    return isNaN(d) ? ts : d.toLocaleString();
-  }
+  if (!ts) return '—';
+  const isoish = typeof ts === 'string' && ts.includes(' ') ? ts.replace(' ', 'T') : ts;
+  const d = new Date(isoish);
+  return isNaN(d) ? String(ts) : d.toLocaleString();
+}
+
   const fmtMinutes = m => (m==null || isNaN(m)) ? '—' : `${m} min`;
   const fmtBattery = mv => (mv==null) ? '—' : `${(mv/1000).toFixed(2)} V (${mv} mV)`;
 
@@ -62,16 +64,35 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mapEl && data.latitude != null && data.longitude != null) {
         const lat = parseFloat(data.latitude);
         const lon = parseFloat(data.longitude);
-        const dLat = 0.003;
-        const dLon = 0.005;
-        const bbox = [
-          (lon - dLon).toFixed(7),
-          (lat - dLat).toFixed(7),
-          (lon + dLon).toFixed(7),
-          (lat + dLat).toFixed(7)
-        ];
-        mapEl.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox[0]}%2C${bbox[1]}%2C${bbox[2]}%2C${bbox[3]}&layer=mapnik&marker=${lat}%2C${lon}`;
-      }
+
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          // clamp a rangos válidos
+          const clampedLat = Math.max(-90, Math.min(90, lat));
+          const clampedLon = Math.max(-180, Math.min(180, lon));
+
+          // ~dLat ~ 0.003° ≈ 330 m; ajustá a gusto
+          const dLat = 0.003;
+          const cos = Math.cos((clampedLat * Math.PI) / 180) || 1; // evita NaN cerca de polos
+          const dLon = 0.005 * cos; // ajusta por latitud
+
+          const left   = (clampedLon - dLon).toFixed(7);
+          const bottom = (clampedLat - dLat).toFixed(7);
+          const right  = (clampedLon + dLon).toFixed(7);
+          const top    = (clampedLat + dLat).toFixed(7);
+
+          const url = new URL("https://www.openstreetmap.org/export/embed.html");
+          url.searchParams.set("bbox", `${left},${bottom},${right},${top}`);
+          url.searchParams.set("layer", "mapnik");
+          url.searchParams.set("marker", `${clampedLat},${clampedLon}`);
+
+          // opcional: forzar un zoom aproximado si no querés bbox
+          // url.searchParams.set("zoom", "16");
+
+          mapEl.src = url.toString();
+        } else {
+          console.warn("Coordenadas inválidas: ", data.latitude, data.longitude);
+        }
+      }           
     } catch (e) {
       setClass('error');
       el.innerHTML = `<span class="fw-semibold">Error</span><br>
