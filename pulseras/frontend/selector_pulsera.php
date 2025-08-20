@@ -14,16 +14,8 @@ $additionalHeadContent = '<script src="js/selector_pulsera.js"></script>';
 
 ob_start();
 
-// Obtener todos los equipos donde el usuario es responsable
-$equipos = getEquiposUsuario($conexion, $_SESSION['user_id']);
-
-// Para cada equipo, obtener sus pulseras
-$equiposTemp = [];
-foreach ($equipos as $equipo) {
-    $equipo['pulseras'] = getPulserasEquipo($conexion, $equipo['id']);
-    $equiposTemp[] = $equipo;
-$equipos = $equiposTemp; // Reemplazar el array original con el procesado
-}
+// Obtener todos los equipos donde el usuario es responsable con sus pulseras
+$equipos = getEquiposConPulseras($conexion, $_SESSION['user_id']);
 // Si se selecciona una pulsera, redirigir al dashboard
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
     $parts = explode(':', $_POST['seleccion']);
