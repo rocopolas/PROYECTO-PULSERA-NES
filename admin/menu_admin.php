@@ -23,7 +23,7 @@ if (!isset($_SESSION['username'])) {
                     <a class="nav-link" href="../auth/register.php">Registrar Usuario</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../pulseras/register_pulsera.php">Registrar Pulsera</a>
+                    <a class="nav-link" href="../admin/register_pulsera.php">Registrar Pulsera</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="registrar_equipo.php">Registrar Equipo</a>
