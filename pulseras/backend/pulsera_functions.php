@@ -64,13 +64,6 @@ function getPulserasEquipo($conexion, $equipo_id) {
     return $pulseras;
 }
 
-/**
- * Obtiene todos los equipos del usuario junto con sus pulseras asociadas.
- *
- * @param mysqli $conexion Conexión a la base de datos.
- * @param int    $user_id  ID del usuario.
- * @return array Lista de equipos con el arreglo 'pulseras' incluido.
- */
 function getEquiposConPulseras($conexion, $user_id) {
     $equipos = getEquiposUsuario($conexion, $user_id);
     foreach ($equipos as &$equipo) {
