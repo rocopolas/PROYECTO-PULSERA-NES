@@ -71,16 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
                         <?php endforeach; ?>
 
                       </div>
-                    <!-- Botones para registrar pulsera o usar código de invitación 
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerBraceletModal">
-                            Registrar Pulsera
-                        </button>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codigoInvitacionModal">
-                            Usar Código de Invitación
-                        </button>
-                    </div>
-                    -->
                 </form>
             </div>
         </div>
