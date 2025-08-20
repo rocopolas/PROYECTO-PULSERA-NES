@@ -92,29 +92,52 @@ $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
             </div>
         </div>
         
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card mb-2">
+        <div class="row row-cols-md-2 mb-4">
+            <div class="col mb-4">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Estado Actual</h5>
-                        <p id="estado-boton" class="text-center text-primary">Cargando estado del botón...</p>
+                        <h5 class="card-title mb-4">Estado Actual</h5>
+                        <div class="d-flex flex-column align-items-center justify-content-center h-75">
+                            <p id="estado-boton" class="text-center text-primary mb-0">Cargando estado del botón...</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
+            <div class="col mb-4">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Información del Equipo</h5>
-                        <p><strong>Equipo:</strong> <?php echo htmlspecialchars($nombre_equipo); ?></p>
-                        <p><strong>Pulsera:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
-                        <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
-                        
+                        <h5 class="card-title mb-4">Información del Equipo</h5>
+                        <div class="d-flex flex-column justify-content-center h-75">
+                            <p><strong>Equipo:</strong> <?php echo htmlspecialchars($nombre_equipo); ?></p>
+                            <p><strong>Pulsera:</strong> <?php echo htmlspecialchars($pulsera['alias']); ?></p>
+                            <p><strong>Funcionamiento:</strong> <?php echo htmlspecialchars($pulsera['funcionamiento']); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Mapa</h5>
+                        <div class="d-flex justify-content-center">
+                            <iframe width="100%" height="350" src="https://www.openstreetmap.org/export/embed.html?bbox=-58.58048558235169%2C-34.5898699395%2C-58.57044339179993%2C-34.58386370936635&amp;layer=mapnik" style="border: 1px solid black"></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <h3 class="mt-4">Historial de eventos</h3>
+        <p>
+
+        <div class="row">
+            <div class="col">
+            <h3 class="mt-4">Historial de eventos</h3>
+            </div>
+        </div>
+
         <?php
         // Paginación
         $eventos_por_pagina = 10;
@@ -131,7 +154,6 @@ $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
 
         // Total de registros para calcular el número de páginas
         $query_total = "SELECT COUNT(*) as total FROM historialxpulseras WHERE id_pulsera = '$id_pulsera'";
-        echo "ID de la pulsera: $id_pulsera\n";
 
         $result_total = $conexion->query($query_total);
         $total_eventos = $result_total->fetch_assoc()['total'];
