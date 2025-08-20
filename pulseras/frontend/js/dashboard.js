@@ -1,7 +1,7 @@
 // Función para obtener el estado del botón desde la base de datos
 function actualizarEstado() {
     $.ajax({
-        url: 'get_estado.php',
+        url: '../backend/get_estado.php',
         method: 'GET',
         dataType: 'json',
         success: function(response) {

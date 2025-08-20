@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/config.php';
+require_once '../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha_emision = $_POST['fecha_emision'];

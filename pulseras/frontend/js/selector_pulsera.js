@@ -9,7 +9,7 @@ function registerBracelet() {
     }
 
     $.ajax({
-        url: 'register_pulser_manual.php',
+        url: '../backend/register_pulser_manual.php',
         method: 'POST',
         data: { id_pulsera: idPulsera },
         dataType: 'json',
@@ -42,7 +42,7 @@ function usarCodigo() {
     }
 
     $.ajax({
-        url: 'validar_codigo_invitacion.php',
+        url: '../backend/validar_codigo_invitacion.php',
         method: 'POST',
         data: { codigo: codigo },
         dataType: 'json',
@@ -53,7 +53,7 @@ function usarCodigo() {
                 
                 setTimeout(function() {
                     $.ajax({
-                        url: 'set_pulsera.php',
+                        url: '../backend/set_pulsera.php',
                         method: 'POST',
                         data: { id_pulsera: response.id_pulsera },
                         success: function() {
