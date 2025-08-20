@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $user['contraseña'])) {
                 $_SESSION['username'] = $user['nombre'];
                 $_SESSION['user_id'] = $user['id'];
-                header("Location: ../pulseras/selector_pulsera.php");
+                header("Location: ../pulseras/frontend/selector_pulsera.php");
                 exit();
             } else {
                 $_SESSION['error'] = "Contraseña incorrecta";

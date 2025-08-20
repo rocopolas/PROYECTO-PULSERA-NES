@@ -5,19 +5,22 @@ $additionalHeadContent = '<link href="colors.css" rel="stylesheet">';
 ob_start();
 ?>
 
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card">
-        <div class="card-body">
-            <h2 class="card-title text-center mb-4">Bienvenido</h2>
-            <div class="d-grid gap-2">
-                <a href="auth/login.php" class="btn btn-primary">Iniciar Sesión</a>
-                <a href="auth/register.php" class="btn btn-secondary">Registrarse</a>
+<div class="container mt-5">
+        <h1 class="text-center">NES</h1>
+        <form id="login-form" action="auth/login.php" method="POST" class="p-4 border rounded shadow-sm">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" id="login-button" class="btn btn-primary w-100" name="Enviar">Iniciar sesión</button>
+        </form>
     </div>
-</div>
 
 <?php
 $content = ob_get_clean();
-require_once 'pulseras/templates/layout.php';
+require_once 'pulseras/frontend/templates/layout.php';
 ?>
