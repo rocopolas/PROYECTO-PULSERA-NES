@@ -1,7 +1,7 @@
 <?php
-require_once '../config/db_connection.php';
-require_once '../auth/session_checks.php';
-require_once 'pulsera_functions.php';
+require_once '../../config/db_connection.php';
+require_once '../../auth/session_checks.php';
+require_once '../backend/pulsera_functions.php';
 
 // Verificar autenticación y selección de equipo
 checkAuth();
@@ -29,7 +29,7 @@ ob_start();
             <h1 class="mb-0">Equipo: <?php echo htmlspecialchars($nombre_equipo); ?></h1>
             <div class="btn-group">
                 <a href="selector_pulsera.php" class="btn btn-secondary">Cambiar Equipo</a>
-                <a href="../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
+                <a href="../../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
             </div>
         </div>
         

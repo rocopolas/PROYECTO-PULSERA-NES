@@ -1,7 +1,7 @@
 <?php
-require_once '../config/db_connection.php';
-require_once '../auth/session_checks.php';
-require_once 'pulsera_functions.php';
+require_once '../../config/db_connection.php';
+require_once '../../auth/session_checks.php';
+require_once '../backend/pulsera_functions.php';
 
 // Verificar autenticación
 checkAuth();
@@ -36,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
 }
 ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../colors.css" rel="stylesheet">
+    <link href="../../colors.css" rel="stylesheet">
 </head>
 <body class="">
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Bienvenido, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-            <a href="../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
+            <a href="../../auth/logout.php" class="btn btn-danger">Cerrar Sesión</a>
         </div>        
         <div class="row justify-content-center">
             <div class="col-md-6">
