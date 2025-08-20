@@ -61,9 +61,9 @@ ob_start();
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title mb-4">Mapa</h5>
-                        <div class="d-flex justify-content-center">
-                            <iframe width="100%" height="350" src="https://www.openstreetmap.org/export/embed.html?bbox=-58.58048558235169%2C-34.5898699395%2C-58.57044339179993%2C-34.58386370936635&amp;layer=mapnik" style="border: 1px solid black"></iframe>
-                        </div>
+        <div class="d-flex justify-content-center">
+            <iframe id="map" width="100%" height="350" style="border: 1px solid black"></iframe>
+        </div>
                     </div>
                 </div>
             </div>

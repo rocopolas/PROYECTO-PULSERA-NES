@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const ENDPOINT = '../backend/get_estado.php'; // <--- AJUSTA ESTA RUTA
   const el = document.getElementById('estado-boton');
+  const mapEl = document.getElementById('map');
 
   if (!el) {
     console.error('No existe #estado-boton en el DOM');
@@ -57,6 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <br><small>Último latido: ${fmtLastSeen(data.last_seen)} (${fmtMinutes(data.minutes_since)})</small>
         <br><small>Batería: ${fmtBattery(data.battery_mv)}</small>
       `;
+
+      if (mapEl && data.latitude != null && data.longitude != null) {
+        const lat = parseFloat(data.latitude);
+        const lon = parseFloat(data.longitude);
+        const dLat = 0.003;
+        const dLon = 0.005;
+        const bbox = [
+          (lon - dLon).toFixed(7),
+          (lat - dLat).toFixed(7),
+          (lon + dLon).toFixed(7),
+          (lat + dLat).toFixed(7)
+        ];
+        mapEl.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox[0]}%2C${bbox[1]}%2C${bbox[2]}%2C${bbox[3]}&layer=mapnik&marker=${lat}%2C${lon}`;
+      }
     } catch (e) {
       setClass('error');
       el.innerHTML = `<span class="fw-semibold">Error</span><br>

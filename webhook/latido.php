@@ -49,19 +49,27 @@ if (array_key_exists('battery_mv', $data) && $data['battery_mv'] !== '' && $data
     $mv = (int)$data['battery_mv'];
     if ($mv <= 0) { $mv = null; }
 }
+$lat = null;
+if (array_key_exists('latitude', $data) && $data['latitude'] !== '' && $data['latitude'] !== null) {
+    $lat = (float)$data['latitude'];
+}
+$lon = null;
+if (array_key_exists('longitude', $data) && $data['longitude'] !== '' && $data['longitude'] !== null) {
+    $lon = (float)$data['longitude'];
+}
 
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO pulseras_heartbeat (pulsera_id, battery_mv)
-        VALUES (:id, :mv)
+        INSERT INTO pulseras_heartbeat (pulsera_id, battery_mv, latitude, longitude)
+        VALUES (:id, :mv, :lat, :lon)
     ");
-    $stmt->execute([':id' => $id, ':mv' => $mv]);
+    $stmt->execute([':id' => $id, ':mv' => $mv, ':lat' => $lat, ':lon' => $lon]);
 
     $newId = (int)$pdo->lastInsertId();
 
     // Leer el registro para devolver received_at exacto
     $stmt2 = $pdo->prepare("
-        SELECT received_at, battery_mv
+        SELECT received_at, battery_mv, latitude, longitude
         FROM pulseras_heartbeat
         WHERE id = :rid
         LIMIT 1
@@ -81,6 +89,8 @@ try {
         'id'          => $newId,
         'id_pulsera'  => $id,
         'battery_mv'  => is_null($row['battery_mv']) ? null : (int)$row['battery_mv'],
+        'latitude'    => is_null($row['latitude']) ? null : (float)$row['latitude'],
+        'longitude'   => is_null($row['longitude']) ? null : (float)$row['longitude'],
         'received_at' => $lastSeenIso
     ]);
 } catch (PDOException $e) {
