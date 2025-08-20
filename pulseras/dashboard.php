@@ -48,57 +48,6 @@ $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="../colors.css" rel="stylesheet">
     <script>
-        // Función para cargar usuarios y sus permisos
-        function cargarUsuarios() {
-            $.ajax({
-                url: '../admin/get_usuarios_admin.php',
-                method: 'GET',
-                data: { id_pulsera: <?php echo $id_pulsera; ?> },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.error) {
-                        $('#adminError').removeClass('d-none').text(response.error);
-                        return;
-                    }
-                    
-                    let html = '';
-                    response.usuarios.forEach(usuario => {
-                        // Use the boolean value directly from the server response
-                        const esAdmin = usuario.es_admin;
-                        html += `
-                            <tr>
-                                <td>${usuario.nombre}</td>
-                                <td>
-                                    <span class="badge ${esAdmin ? 'bg-success' : 'bg-secondary'}" data-user-id="${usuario.id}">
-                                        ${esAdmin ? 'Sí' : 'No'}
-                                    </span>
-                                </td>
-
-                            </tr>
-                        `;
-                    });
-                    $('#usuariosList').html(html);
-
-                    // Añadir eventos de clic después de cargar los usuarios
-                    $('.btn-admin').off('click').on('click', function() {
-                        const userId = $(this).data('user-id');
-                        const esAdmin = $(this).hasClass('btn-danger');
-                        // Usamos el valor opuesto de esAdmin ya que estamos cambiando el estado
-                        cambiarPermiso(userId, !esAdmin);
-                    });
-
-                    $('.btn-delete').off('click').on('click', function() {
-                        const userId = $(this).data('user-id');
-                        eliminarPermiso(userId);
-                    });
-                },
-                error: function() {
-                    $('#adminError').removeClass('d-none').text('Error al cargar los usuarios');
-                }
-            });
-        }
-
-        
         // Función para obtener el estado del botón desde la base de datos
         function actualizarEstado() {
             $.ajax({
@@ -117,29 +66,6 @@ $nombre_equipo = $pulsera['nombre_equipo'] ?? 'Sin equipo asignado';
                 },
                 error: function() {
                     $('#estado-boton').text('Error al obtener el estado del botón.');
-                }
-            });
-        }
-
-        // Función para generar código de invitación
-        function generarCodigo() {
-            $.ajax({
-                url: '../admin/generar_codigo_invitacion.php',
-                method: 'POST',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        $('#codigoGenerado').removeClass('d-none');
-                        $('#codigoTexto').text(response.codigo);
-                        $('#mensajeError').addClass('d-none');
-                    } else {
-                        $('#mensajeError').removeClass('d-none');
-                        $('#mensajeError').text(response.message);
-                    }
-                },
-                error: function() {
-                    $('#mensajeError').removeClass('d-none');
-                    $('#mensajeError').text('Error al generar el código de invitación');
                 }
             });
         }
