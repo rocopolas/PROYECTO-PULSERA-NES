@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
     
     // Hash de la contraseña usando bcrypt
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     
     try {
         $stmt = $pdo->prepare("INSERT INTO usuarios (nombre, email, contraseña, direccion) VALUES (?, ?, ?, ?)");
