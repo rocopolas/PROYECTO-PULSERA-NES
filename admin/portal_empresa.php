@@ -49,15 +49,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
             }
             break;
-        case 'responsable':
+        case 'agregar_responsable':
             if (!empty($_POST['equipo_id_resp']) && !empty($_POST['usuario_id'])) {
                 $equipo_id = $_POST['equipo_id_resp'];
                 $usuario_id = $_POST['usuario_id'];
-                $stmt = $pdo->prepare('UPDATE equipos SET responsable_equipo = ? WHERE id = ?');
-                if ($stmt->execute([$usuario_id, $equipo_id])) {
-                    $mensaje = '<div class="alert alert-success mt-3">Responsable actualizado.</div>';
+                $stmt = $pdo->prepare('SELECT id FROM equiposxresponsables WHERE equipo_id = ? AND usuario_id = ?');
+                $stmt->execute([$equipo_id, $usuario_id]);
+                if ($stmt->fetch()) {
+                    $mensaje = '<div class="alert alert-warning mt-3">El usuario ya es responsable de este equipo.</div>';
                 } else {
-                    $mensaje = '<div class="alert alert-danger mt-3">Error al actualizar responsable.</div>';
+                    $stmt = $pdo->prepare('INSERT INTO equiposxresponsables (equipo_id, usuario_id) VALUES (?, ?)');
+                    if ($stmt->execute([$equipo_id, $usuario_id])) {
+                        $mensaje = '<div class="alert alert-success mt-3">Responsable agregado.</div>';
+                    } else {
+                        $mensaje = '<div class="alert alert-danger mt-3">Error al agregar responsable.</div>';
+                    }
+                }
+            }
+            break;
+        case 'eliminar_responsable':
+            if (!empty($_POST['responsable_id'])) {
+                $resp_id = $_POST['responsable_id'];
+                $stmt = $pdo->prepare('DELETE FROM equiposxresponsables WHERE id = ?');
+                if ($stmt->execute([$resp_id])) {
+                    $mensaje = '<div class="alert alert-success mt-3">Responsable eliminado.</div>';
+                } else {
+                    $mensaje = '<div class="alert alert-danger mt-3">Error al eliminar responsable.</div>';
                 }
             }
             break;
@@ -98,6 +115,7 @@ $equipos = $pdo->query('SELECT id, nombre_equipo FROM equipos ORDER BY nombre_eq
 $pulseras = $pdo->query('SELECT id, alias FROM pulseras ORDER BY alias')->fetchAll(PDO::FETCH_ASSOC);
 $usuarios = $pdo->query('SELECT id, nombre FROM usuarios ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC);
 $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvitados i JOIN pulseras p ON i.pulsera_id = p.id JOIN usuarios u ON i.invitado_id = u.id ORDER BY p.alias, u.nombre')->fetchAll(PDO::FETCH_ASSOC);
+$responsables = $pdo->query('SELECT r.id, e.nombre_equipo, u.nombre FROM equiposxresponsables r JOIN equipos e ON r.equipo_id = e.id JOIN usuarios u ON r.usuario_id = u.id ORDER BY e.nombre_equipo, u.nombre')->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -195,9 +213,9 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Cambiar Responsable de Equipo</h5>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="responsable">
+                        <h5 class="card-title">Gestionar Responsables de Equipo</h5>
+                        <form method="POST" class="mb-3">
+                            <input type="hidden" name="action" value="agregar_responsable">
                             <div class="mb-3">
                                 <label for="equipo_id_resp" class="form-label">Equipo</label>
                                 <select id="equipo_id_resp" name="equipo_id_resp" class="form-select" required>
@@ -208,7 +226,7 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="usuario_id" class="form-label">Nuevo Responsable</label>
+                                <label for="usuario_id" class="form-label">Usuario</label>
                                 <select id="usuario_id" name="usuario_id" class="form-select" required>
                                     <option value="">Seleccione un usuario</option>
                                     <?php foreach ($usuarios as $us): ?>
@@ -216,8 +234,36 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary">Actualizar Responsable</button>
+                            <button type="submit" class="btn btn-primary">Agregar Responsable</button>
                         </form>
+                        <?php if (!empty($responsables)): ?>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Equipo</th>
+                                        <th>Usuario</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($responsables as $resp): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($resp['nombre_equipo']); ?></td>
+                                            <td><?php echo htmlspecialchars($resp['nombre']); ?></td>
+                                            <td>
+                                                <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="action" value="eliminar_responsable">
+                                                    <input type="hidden" name="responsable_id" value="<?php echo $resp['id']; ?>">
+                                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p class="text-muted">No hay responsables registrados.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
