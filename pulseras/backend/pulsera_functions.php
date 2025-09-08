@@ -72,4 +72,18 @@ function getEquiposConPulseras($conexion, $user_id) {
     unset($equipo); // Romper la referencia para evitar efectos secundarios
     return $equipos;
 }
+
+function getPulserasInvitado($conexion, $user_id) {
+    $query = "SELECT p.id AS id_pulsera, p.alias, p.funcionamiento
+              FROM pulseras p
+              INNER JOIN pulserasxinvitados px ON p.id = px.pulsera_id
+              WHERE px.invitado_id = ?";
+    $stmt = $conexion->prepare($query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $pulseras = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    return $pulseras;
+}
 ?>

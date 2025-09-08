@@ -16,14 +16,23 @@ ob_start();
 
 // Obtener todos los equipos donde el usuario es responsable con sus pulseras
 $equipos = getEquiposConPulseras($conexion, $_SESSION['user_id']);
+// Obtener pulseras a las que el usuario fue invitado
+$pulseras_invitadas = getPulserasInvitado($conexion, $_SESSION['user_id']);
 // Si se selecciona una pulsera, redirigir al dashboard
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
     $parts = explode(':', $_POST['seleccion']);
     if (count($parts) === 2) {
-        $_SESSION['selected_equipo'] = $parts[0];
-        $_SESSION['selected_pulsera'] = $parts[1];
-        header("Location: dashboard.php");
-        exit();
+        if ($parts[0] === 'inv') {
+            $_SESSION['selected_equipo'] = 0;
+            $_SESSION['selected_pulsera'] = $parts[1];
+            header("Location: mapa_invitado.php");
+            exit();
+        } else {
+            $_SESSION['selected_equipo'] = $parts[0];
+            $_SESSION['selected_pulsera'] = $parts[1];
+            header("Location: dashboard.php");
+            exit();
+        }
     }
 }
 ?>
@@ -41,9 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
                 <form method="POST" class="p-4 border rounded bg-white shadow-sm">
                     <div class="mb-4">
                         <h3 class="mb-3">Equipos disponibles</h3>
-                        <?php 
-                        foreach ($equipos as $equipo):
-                        ?>
+                        <?php foreach ($equipos as $equipo): ?>
                             <div class="equipo-container mb-4">
                                 <h5 class="mt-3 mb-2">
                                     <?php echo htmlspecialchars($equipo['nombre_equipo']); ?>
@@ -69,8 +76,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccion'])) {
                                 </div>
                             </div>
                         <?php endforeach; ?>
+                    </div>
 
-                      </div>
+                    <div class="mb-4">
+                        <h3 class="mb-3">Pulseras invitadas</h3>
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                            <?php if (!empty($pulseras_invitadas)): ?>
+                                <?php foreach ($pulseras_invitadas as $pulsera): ?>
+                                    <div class="col">
+                                        <button type="submit"
+                                                name="seleccion"
+                                                value="<?php echo 'inv:' . $pulsera['id_pulsera']; ?>"
+                                                class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-between p-3 rounded">
+                                            <div class="fw-bold mb-2"><?php echo htmlspecialchars($pulsera['alias']); ?></div>
+                                            <div class=""><?php echo htmlspecialchars($pulsera['funcionamiento']); ?></div>
+                                        </button>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col">
+                                    <div class="alert alert-warning w-100">No tienes invitaciones a pulseras.</div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
