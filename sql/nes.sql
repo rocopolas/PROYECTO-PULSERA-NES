@@ -117,6 +117,18 @@ INSERT INTO `pulserasxequipo` (`id`, `pulsera_id`, `equipo_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `pulserasxinvitados`
+--
+
+CREATE TABLE `pulserasxinvitados` (
+  `id` int(11) NOT NULL,
+  `pulsera_id` int(11) NOT NULL,
+  `invitado_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `pulseras_heartbeat`
 --
 
@@ -195,6 +207,14 @@ ALTER TABLE `pulserasxequipo`
   ADD KEY `equipo_id` (`equipo_id`);
 
 --
+-- Indices de la tabla `pulserasxinvitados`
+--
+ALTER TABLE `pulserasxinvitados`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pulsera_id` (`pulsera_id`),
+  ADD KEY `invitado_id` (`invitado_id`);
+
+--
 -- Indices de la tabla `pulseras_heartbeat`
 --
 ALTER TABLE `pulseras_heartbeat`
@@ -238,6 +258,12 @@ ALTER TABLE `pulserasxequipo`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT de la tabla `pulserasxinvitados`
+--
+ALTER TABLE `pulserasxinvitados`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `pulseras_heartbeat`
 --
 ALTER TABLE `pulseras_heartbeat`
@@ -265,6 +291,13 @@ ALTER TABLE `historialxpulseras`
 ALTER TABLE `pulserasxequipo`
   ADD CONSTRAINT `pulserasxequipo_ibfk_1` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`),
   ADD CONSTRAINT `pulserasxequipo_ibfk_2` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
+
+--
+-- Filtros para la tabla `pulserasxinvitados`
+--
+ALTER TABLE `pulserasxinvitados`
+  ADD CONSTRAINT `pulserasxinvitados_ibfk_1` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `pulserasxinvitados_ibfk_2` FOREIGN KEY (`invitado_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `pulseras_heartbeat`
