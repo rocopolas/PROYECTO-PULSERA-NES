@@ -8,7 +8,6 @@ Este repositorio contiene una plataforma web y un ejemplo de firmware para gesti
 - `auth/` – Endpoints PHP para registro, inicio de sesión y cierre de sesión de usuarios.
 - `pulseras/` – Panel para usuarios registrados. Permite seleccionar un equipo, ver el estado de una pulsera y revisar el historial de eventos.
 - `admin/` – Herramientas de administración: registro de equipos y pulseras, asociación de pulseras a equipos, gestión de accesos y generación de códigos de invitación.
-- `admin/portal_empresa.php` – Portal para empresas que permite asociar pulseras a equipos, editar alias, asignar responsables y gestionar invitaciones.
 - `webhook/` – Punto de entrada que recibe eventos HTTP desde dispositivos externos y los almacena en la base de datos.
 - `arduinoide/` – Ejemplo de sketch para ESP32 que envía un evento al webhook al presionar un botón.
 - `sql/nes.sql` – Script con la estructura de la base de datos.
