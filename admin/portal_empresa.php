@@ -162,35 +162,237 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
         <?php echo $mensaje; ?>
 
         <div class="row g-4">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Asociar Pulsera a Equipo</h5>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="asociar">
-                            <div class="mb-3">
-                                <label for="equipo_id" class="form-label">Equipo</label>
-                                <select id="equipo_id" name="equipo_id" class="form-select" required>
-                                    <option value="">Seleccione un equipo</option>
-                                    <?php foreach ($equipos as $eq): ?>
-                                        <option value="<?php echo $eq['id']; ?>"><?php echo htmlspecialchars($eq['nombre_equipo']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                        <div class="mb-3">
+                            <label for="equipo_id" class="form-label">Equipo</label>
+                            <select id="equipo_id" class="form-select">
+                                <option value="">Seleccione un equipo</option>
+                                <?php foreach ($equipos as $eq): ?>
+                                    <option value="<?php echo $eq['id']; ?>"><?php echo htmlspecialchars($eq['nombre_equipo']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Pulseras sin asignar
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="unassigned-bracelets" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="pulsera_id" class="form-label">Pulsera</label>
-                                <select id="pulsera_id" name="pulsera_id" class="form-select" required>
-                                    <option value="">Seleccione una pulsera</option>
-                                    <?php foreach ($pulseras as $pul): ?>
-                                        <option value="<?php echo $pul['id']; ?>"><?php echo htmlspecialchars($pul['alias']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Pulseras del equipo
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="assigned-bracelets" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Asociar</button>
-                        </form>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button id="save-changes" class="btn btn-primary" disabled>Guardar cambios</button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <style>
+                .bracelet-container {
+                    min-height: 200px;
+                    border: 2px dashed #ccc;
+                    padding: 10px;
+                    border-radius: 5px;
+                }
+                .bracelet-item {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    padding: 8px 12px;
+                    margin: 5px 0;
+                    border-radius: 4px;
+                    cursor: move;
+                    user-select: none;
+                }
+                .bracelet-item:hover {
+                    background: #e9ecef;
+                }
+                .bracelet-container.dragover {
+                    background: #e9ecef;
+                    border-color: #0d6efd;
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const equipoSelect = document.getElementById('equipo_id');
+                    const unassignedContainer = document.getElementById('unassigned-bracelets');
+                    const assignedContainer = document.getElementById('assigned-bracelets');
+                    const saveButton = document.getElementById('save-changes');
+                    let originalState = { unassigned: [], assigned: [] };
+                    let currentState = { unassigned: [], assigned: [] };
+
+                    equipoSelect.addEventListener('change', loadBracelets);
+
+                    function loadBracelets() {
+                        const equipoId = equipoSelect.value;
+                        if (!equipoId) {
+                            clearContainers();
+                            return;
+                        }
+
+                        // Get all bracelets and their assignments
+                        fetch(`asociar_pulsera_equipo.php?equipo_id=${equipoId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    originalState = {
+                                        unassigned: data.unassigned,
+                                        assigned: data.assigned
+                                    };
+                                    currentState = JSON.parse(JSON.stringify(originalState));
+                                    renderBracelets();
+                                }
+                            });
+                    }
+
+                    function clearContainers() {
+                        unassignedContainer.innerHTML = '';
+                        assignedContainer.innerHTML = '';
+                        saveButton.disabled = true;
+                    }
+
+                    function renderBracelets() {
+                        unassignedContainer.innerHTML = '';
+                        assignedContainer.innerHTML = '';
+
+                        currentState.unassigned.forEach(bracelet => {
+                            const div = createBraceletElement(bracelet);
+                            unassignedContainer.appendChild(div);
+                        });
+
+                        currentState.assigned.forEach(bracelet => {
+                            const div = createBraceletElement(bracelet);
+                            assignedContainer.appendChild(div);
+                        });
+
+                        checkChanges();
+                    }
+
+                    function createBraceletElement(bracelet) {
+                        const div = document.createElement('div');
+                        div.className = 'bracelet-item';
+                        div.draggable = true;
+                        div.dataset.id = bracelet.id;
+                        div.textContent = bracelet.alias;
+                        
+                        div.addEventListener('dragstart', handleDragStart);
+                        div.addEventListener('dragend', handleDragEnd);
+                        return div;
+                    }
+
+                    function handleDragStart(e) {
+                        e.target.style.opacity = '0.4';
+                        e.dataTransfer.setData('text/plain', e.target.dataset.id);
+                    }
+
+                    function handleDragEnd(e) {
+                        e.target.style.opacity = '1';
+                    }
+
+                    [unassignedContainer, assignedContainer].forEach(container => {
+                        container.addEventListener('dragover', e => {
+                            e.preventDefault();
+                            container.classList.add('dragover');
+                        });
+
+                        container.addEventListener('dragleave', e => {
+                            container.classList.remove('dragover');
+                        });
+
+                        container.addEventListener('drop', e => {
+                            e.preventDefault();
+                            container.classList.remove('dragover');
+                            
+                            const braceletId = e.dataTransfer.getData('text/plain');
+                            const braceletElement = document.querySelector(`[data-id="${braceletId}"]`);
+                            
+                            if (braceletElement) {
+                                const fromAssigned = braceletElement.parentElement === assignedContainer;
+                                const toAssigned = container === assignedContainer;
+                                
+                                if (fromAssigned !== toAssigned) {
+                                    const bracelet = fromAssigned 
+                                        ? currentState.assigned.find(b => b.id === parseInt(braceletId))
+                                        : currentState.unassigned.find(b => b.id === parseInt(braceletId));
+
+                                    if (bracelet) {
+                                        if (fromAssigned) {
+                                            currentState.assigned = currentState.assigned.filter(b => b.id !== bracelet.id);
+                                            currentState.unassigned.push(bracelet);
+                                        } else {
+                                            currentState.unassigned = currentState.unassigned.filter(b => b.id !== bracelet.id);
+                                            currentState.assigned.push(bracelet);
+                                        }
+                                        
+                                        currentState.unassigned.sort((a, b) => a.alias.localeCompare(b.alias));
+                                        currentState.assigned.sort((a, b) => a.alias.localeCompare(b.alias));
+                                        
+                                        renderBracelets();
+                                    }
+                                }
+                            }
+                        });
+                    });
+
+                    function checkChanges() {
+                        const hasChanges = 
+                            JSON.stringify(originalState.unassigned.map(b => b.id).sort()) !== 
+                            JSON.stringify(currentState.unassigned.map(b => b.id).sort());
+                        
+                        saveButton.disabled = !hasChanges;
+                    }
+
+                    saveButton.addEventListener('click', () => {
+                        const equipoId = equipoSelect.value;
+                        if (!equipoId) return;
+
+                        const changes = {
+                            equipo_id: equipoId,
+                            assigned: currentState.assigned.map(b => b.id)
+                        };
+
+                        fetch('asociar_pulsera_equipo.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(changes)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Cambios guardados correctamente');
+                                originalState = JSON.parse(JSON.stringify(currentState));
+                                checkChanges();
+                            } else {
+                                alert('Error al guardar los cambios');
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error al guardar los cambios');
+                        });
+                    });
+                });
+            </script>
 
             <div class="col-md-6">
                 <div class="card h-100">

@@ -2,34 +2,90 @@
 session_start();
 require_once '../config/config.php';
 
-// Verifica si el usuario está autenticado y es administrador
+// Verifica si el usuario está autenticado
 if (!isset($_SESSION['username'])) {
-    header("Location: ../index.html");
+    header('Location: ../index.html');
     exit();
 }
 
-// Obtener equipos y pulseras para el formulario
-$equipos = $pdo->query("SELECT id, nombre_equipo FROM equipos ORDER BY nombre_equipo")->fetchAll(PDO::FETCH_ASSOC);
-$pulseras = $pdo->query("SELECT id, alias FROM pulseras ORDER BY alias")->fetchAll(PDO::FETCH_ASSOC);
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $equipo_id = isset($_GET['equipo_id']) ? (int)$_GET['equipo_id'] : 0;
 
-// Procesar el formulario
-$mensaje = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['equipo_id'], $_POST['pulsera_id'])) {
-    $equipo_id = $_POST['equipo_id'];
-    $pulsera_id = $_POST['pulsera_id'];
-    // Verificar si ya existe la relación
-    $stmt = $pdo->prepare("SELECT id FROM pulserasxequipo WHERE equipo_id = ? AND pulsera_id = ?");
-    $stmt->execute([$equipo_id, $pulsera_id]);
-    if ($stmt->fetch()) {
-        $mensaje = '<div class="alert alert-warning mt-3">La pulsera ya está asociada a este equipo.</div>';
-    } else {
-        $stmt = $pdo->prepare("INSERT INTO pulserasxequipo (equipo_id, pulsera_id) VALUES (?, ?)");
-        if ($stmt->execute([$equipo_id, $pulsera_id])) {
-            $mensaje = '<div class="alert alert-success mt-3">Pulsera asociada correctamente al equipo.</div>';
-        } else {
-            $mensaje = '<div class="alert alert-danger mt-3">Error al asociar la pulsera.</div>';
+    try {
+        // Get unassigned bracelets
+        $stmt = $pdo->prepare("
+            SELECT p.id, p.alias 
+            FROM pulseras p 
+            LEFT JOIN pulserasxequipo pe ON p.id = pe.pulsera_id 
+            WHERE pe.id IS NULL
+            ORDER BY p.alias
+        ");
+        $stmt->execute();
+        $unassigned = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get bracelets assigned to the selected team
+        $assigned = [];
+        if ($equipo_id > 0) {
+            $stmt = $pdo->prepare("
+                SELECT p.id, p.alias 
+                FROM pulseras p 
+                JOIN pulserasxequipo pe ON p.id = pe.pulsera_id 
+                WHERE pe.equipo_id = ?
+                ORDER BY p.alias
+            ");
+            $stmt->execute([$equipo_id]);
+            $assigned = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        echo json_encode([
+            'success' => true,
+            'unassigned' => $unassigned,
+            'assigned' => $assigned
+        ]);
+        exit;
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Error al obtener los datos'
+        ]);
+        exit;
     }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get JSON data
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!$data || !isset($data['equipo_id']) || !isset($data['assigned'])) {
+        echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+        exit;
+    }
+
+    $equipo_id = (int)$data['equipo_id'];
+    $assigned_ids = array_map('intval', $data['assigned']);
+
+    try {
+        $pdo->beginTransaction();
+
+        // Remove all current assignments for this team
+        $stmt = $pdo->prepare('DELETE FROM pulserasxequipo WHERE equipo_id = ?');
+        $stmt->execute([$equipo_id]);
+
+        // Add new assignments
+        if (!empty($assigned_ids)) {
+            $stmt = $pdo->prepare('INSERT INTO pulserasxequipo (equipo_id, pulsera_id) VALUES (?, ?)');
+            foreach ($assigned_ids as $pulsera_id) {
+                $stmt->execute([$equipo_id, $pulsera_id]);
+            }
+        }
+
+        $pdo->commit();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        echo json_encode(['success' => false, 'error' => 'Error al guardar los cambios']);
+    }
+    exit;
 }
 ?>
 
