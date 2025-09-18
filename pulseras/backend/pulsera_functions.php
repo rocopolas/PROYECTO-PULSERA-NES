@@ -38,9 +38,11 @@ function getTotalEventos($conexion, $id_pulsera) {
     $result = $stmt->get_result();
     return $result->fetch_assoc()['total'];
 }
-
 function getEquiposUsuario($conexion, $user_id) {
-    $query = "SELECT id, nombre_equipo FROM equipos WHERE responsable_equipo = ?";
+    $query = "SELECT e.id, e.nombre_equipo 
+              FROM equipos e
+              INNER JOIN equiposxrepresentantes exr ON e.id = exr.equipo_id
+              WHERE exr.usuario_id = ?";
     $stmt = $conexion->prepare($query);
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
@@ -64,6 +66,19 @@ function getPulserasEquipo($conexion, $equipo_id) {
     return $pulseras;
 }
 
+function getRepresentantesEquipo($conexion, $equipo_id) {
+    $query = "SELECT u.id, u.nombre
+              FROM equiposxrepresentantes exr
+              INNER JOIN usuarios u ON exr.usuario_id = u.id
+              WHERE exr.equipo_id = ?";
+    $stmt = $conexion->prepare($query);
+    $stmt->bind_param("i", $equipo_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $representantes = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    return $representantes;
+}
 function getEquiposConPulseras($conexion, $user_id) {
     $equipos = getEquiposUsuario($conexion, $user_id);
     foreach ($equipos as &$equipo) {

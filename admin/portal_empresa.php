@@ -61,34 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     throw new Exception('Datos inválidos.');
                 }
 
-                // 1) Traigo el nombre_equipo del equipo "base" seleccionado
-                $sql = "SELECT nombre_equipo FROM equipos WHERE id = :e LIMIT 1";
+                // Evitar duplicados en equiposxrepresentantes
+                $sql = "SELECT 1 FROM equiposxrepresentantes WHERE equipo_id = :e AND usuario_id = :u LIMIT 1";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([':e' => $equipo_id]);
-                $nombre_equipo = $stmt->fetchColumn();
-                if (!$nombre_equipo) {
-                    throw new Exception('Equipo no encontrado.');
-                }
-
-                // 2) Evito duplicar la misma combinación nombre_equipo + responsable_equipo
-                $sql = "SELECT 1
-                FROM equipos
-                WHERE nombre_equipo = :n AND responsable_equipo = :u
-                LIMIT 1";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([':n' => $nombre_equipo, ':u' => $usuario_id]);
+                $stmt->execute([':e' => $equipo_id, ':u' => $usuario_id]);
                 $yaExiste = $stmt->fetchColumn();
 
                 if ($yaExiste) {
                     $mensaje = '<div class="alert alert-warning mt-3">Ese usuario ya figura como responsable de este equipo.</div>';
                 } else {
-                    // 3) Inserto una NUEVA fila en equipos con el mismo nombre_equipo y el nuevo responsable
-                    //    OJO: esto asume que no hay otras columnas NOT NULL sin default en `equipos`.
-                    $sql = "INSERT INTO equipos (nombre_equipo, responsable_equipo)
-                    VALUES (:n, :u)";
+                    $sql = "INSERT INTO equiposxrepresentantes (equipo_id, usuario_id) VALUES (:e, :u)";
                     $stmt = $pdo->prepare($sql);
-                    $stmt->execute([':n' => $nombre_equipo, ':u' => $usuario_id]);
-
+                    $stmt->execute([':e' => $equipo_id, ':u' => $usuario_id]);
                     $mensaje = '<div class="alert alert-success mt-3">Responsable agregado para el equipo.</div>';
                 }
             } catch (Throwable $e) {
@@ -98,41 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
         case 'resp_multi_del':
             try {
-                $equipo_id  = (int)($_POST['equipo_id_resps'] ?? 0);   // equipo "base" referencial
+                $equipo_id  = (int)($_POST['equipo_id_resps'] ?? 0);
                 $usuario_id = (int)($_POST['usuario_id_resp_del'] ?? 0);
                 if ($equipo_id <= 0 || $usuario_id <= 0) {
                     throw new Exception('Datos inválidos.');
                 }
 
-                // Nombre del equipo base
-                $sql = "SELECT nombre_equipo FROM equipos WHERE id = :e LIMIT 1";
+                $sql = "DELETE FROM equiposxrepresentantes WHERE equipo_id = :e AND usuario_id = :u";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([':e' => $equipo_id]);
-                $nombre_equipo = $stmt->fetchColumn();
-                if (!$nombre_equipo) {
-                    throw new Exception('Equipo no encontrado.');
-                }
-
-                // Borro SOLO la(s) fila(s) duplicadas con ese nombre_equipo y ese responsable,
-                // pero NO borro el equipo base si justo coincide (protección con e.id <> :eBase)
-                $sql = "DELETE e
-                FROM equipos e
-                JOIN (SELECT :n AS nombre_equipo, :eBase AS id_base) x
-                ON e.nombre_equipo = x.nombre_equipo
-                WHERE e.responsable_equipo = :u
-                AND e.id <> x.id_base";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':n'    => $nombre_equipo,
-                    ':u'    => $usuario_id,
-                    ':eBase'=> $equipo_id
-                ]);
-
+                $stmt->execute([':e' => $equipo_id, ':u' => $usuario_id]);
                 $af = $stmt->rowCount();
                 if ($af > 0) {
-                    $mensaje = '<div class="alert alert-success mt-3">Responsable quitado (' . $af . ' fila(s)).</div>';
+                    $mensaje = '<div class="alert alert-success mt-3">Responsable quitado.</div>';
                 } else {
-                    $mensaje = '<div class="alert alert-warning mt-3">No había una fila duplicada para ese responsable en este equipo.</div>';
+                    $mensaje = '<div class="alert alert-warning mt-3">Ese usuario no era responsable de este equipo.</div>';
                 }
             } catch (Throwable $e) {
                 $mensaje = '<div class="alert alert-danger mt-3">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
@@ -304,31 +267,21 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
             <button type="submit" class="btn btn-outline-secondary">Mostrar</button>
             </form>
 
-            <!-- Listado de responsables actuales (según "nombre_equipo" del equipo base seleccionado) -->
+            <!-- Listado de responsables actuales usando equiposxrepresentantes -->
             <?php
             $responsables = [];
             $equipo_id_sel = null;
 
             if (!empty($_GET['equipo_id_resps'])) {
                 $equipo_id_sel = (int)$_GET['equipo_id_resps'];
-
-                // 1) sacar el nombre_equipo del "equipo base"
-                $stmt = $pdo->prepare("SELECT nombre_equipo FROM equipos WHERE id = ? LIMIT 1");
+                $sql = "SELECT u.id, u.nombre
+                        FROM equiposxrepresentantes exr
+                        JOIN usuarios u ON exr.usuario_id = u.id
+                        WHERE exr.equipo_id = ?
+                        ORDER BY u.nombre";
+                $stmt = $pdo->prepare($sql);
                 $stmt->execute([$equipo_id_sel]);
-                $nombre_equipo_sel = $stmt->fetchColumn();
-
-                if ($nombre_equipo_sel) {
-                    // 2) para ese nombre_equipo, listar todos los responsables (distintos)
-                    $sql = "SELECT DISTINCT u.id, u.nombre
-                    FROM equipos e
-                    JOIN usuarios u ON u.id = e.responsable_equipo
-                    WHERE e.nombre_equipo = ?
-                    AND e.responsable_equipo IS NOT NULL
-                    ORDER BY u.nombre";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([$nombre_equipo_sel]);
-                    $responsables = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                }
+                $responsables = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
             ?>
 
@@ -364,6 +317,7 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
             </div>
             </div>
             </div>
+
 
 
 

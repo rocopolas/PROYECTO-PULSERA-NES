@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const ENDPOINT = '../backend/get_estado.php'; // <--- AJUSTA ESTA RUTA
+  const ENDPOINT = '/pulseras/backend/get_estado.php'; // <--- AJUSTA ESTA RUTA
   const el = document.getElementById('estado-boton');
   const mapEl = document.getElementById('map');
 

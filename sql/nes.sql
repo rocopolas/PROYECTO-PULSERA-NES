@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 20-08-2025 a las 18:15:00
+-- Servidor: localhost
+-- Tiempo de generación: 19-09-2025 a las 00:09:20
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -29,17 +29,29 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `equipos` (
   `id` int(11) NOT NULL,
-  `nombre_equipo` varchar(100) NOT NULL,
-  `responsable_equipo` int(11) NOT NULL
+  `nombre_equipo` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `equipos`
 --
 
-INSERT INTO `equipos` (`id`, `nombre_equipo`, `responsable_equipo`) VALUES
-(1, 'A', 1),
-(2, 'B', 1);
+INSERT INTO `equipos` (`id`, `nombre_equipo`) VALUES
+(1, 'A'),
+(2, 'B'),
+(6, 'A');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `equiposxrepresentantes`
+--
+
+CREATE TABLE `equiposxrepresentantes` (
+  `id` int(11) NOT NULL,
+  `equipo_id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -91,7 +103,7 @@ INSERT INTO `pulseras` (`id`, `fecha_emision`, `version`, `funcionamiento`, `ali
 (1, '2006-08-18', '1.0', 'mantenimiento', 'Marta', '2025-06-09 23:24:10'),
 (2, '2007-01-24', '1.0', 'funcionando', 'Pato (bullrich)', '2025-06-09 23:28:00'),
 (3, '2006-06-23', '6.6.6', 'funcionando', 'Colucci', '2025-06-23 21:57:28'),
-(4, '1111-11-11', '1', 'funcionando', 'asd', '2025-08-18 18:53:15');
+(4, '1111-11-11', '1', 'funcionando', 'asdfg', '2025-08-18 18:53:15');
 
 -- --------------------------------------------------------
 
@@ -112,7 +124,8 @@ CREATE TABLE `pulserasxequipo` (
 INSERT INTO `pulserasxequipo` (`id`, `pulsera_id`, `equipo_id`) VALUES
 (1, 1, 1),
 (2, 3, 1),
-(3, 2, 2);
+(3, 2, 2),
+(4, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -121,10 +134,17 @@ INSERT INTO `pulserasxequipo` (`id`, `pulsera_id`, `equipo_id`) VALUES
 --
 
 CREATE TABLE `pulserasxinvitados` (
-  `id` int(11) NOT NULL,
+  `id` int(10) UNSIGNED NOT NULL,
   `pulsera_id` int(11) NOT NULL,
   `invitado_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pulserasxinvitados`
+--
+
+INSERT INTO `pulserasxinvitados` (`id`, `pulsera_id`, `invitado_id`) VALUES
+(1, 4, 1);
 
 -- --------------------------------------------------------
 
@@ -171,7 +191,8 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `nombre`, `contraseña`, `email`, `direccion`, `created_at`) VALUES
 (1, 'roco', '$2y$10$H0te.I6j641jG/r/99d1nu3dzUO0k/vdxUOkN1TdukqBOkyjfM4ua', 'roco@perez.com', 'ortega y gasset 2253', '2025-06-09 23:20:35'),
-(2, 'Rudka', '$2y$10$fDe4W32ViPGcFKkYHM.i.OWKmfVuRXTPxZqRaK62lr4NyBitf0ntC', 'rudka@rudka.com', 'lol 123', '2025-06-23 23:24:15');
+(2, 'Rudka', '$2y$10$fDe4W32ViPGcFKkYHM.i.OWKmfVuRXTPxZqRaK62lr4NyBitf0ntC', 'rudka@rudka.com', 'lol 123', '2025-06-23 23:24:15'),
+(3, 'test', '$2y$12$PlBB82uUrZYT8BL/3ovSyODJkxhBJYrFAlxQvKQFlz3pdvWRxderm', 'test@test.com', 'test', '2025-09-04 21:58:11');
 
 --
 -- Índices para tablas volcadas
@@ -182,6 +203,14 @@ INSERT INTO `usuarios` (`id`, `nombre`, `contraseña`, `email`, `direccion`, `cr
 --
 ALTER TABLE `equipos`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `equiposxrepresentantes`
+--
+ALTER TABLE `equiposxrepresentantes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `equipo_id` (`equipo_id`),
+  ADD KEY `usuario_id` (`usuario_id`);
 
 --
 -- Indices de la tabla `historialxpulseras`
@@ -210,9 +239,7 @@ ALTER TABLE `pulserasxequipo`
 -- Indices de la tabla `pulserasxinvitados`
 --
 ALTER TABLE `pulserasxinvitados`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `pulsera_id` (`pulsera_id`),
-  ADD KEY `invitado_id` (`invitado_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indices de la tabla `pulseras_heartbeat`
@@ -237,7 +264,13 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `equipos`
 --
 ALTER TABLE `equipos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `equiposxrepresentantes`
+--
+ALTER TABLE `equiposxrepresentantes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `historialxpulseras`
@@ -255,13 +288,13 @@ ALTER TABLE `pulseras`
 -- AUTO_INCREMENT de la tabla `pulserasxequipo`
 --
 ALTER TABLE `pulserasxequipo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `pulserasxinvitados`
 --
 ALTER TABLE `pulserasxinvitados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `pulseras_heartbeat`
@@ -273,11 +306,18 @@ ALTER TABLE `pulseras_heartbeat`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `equiposxrepresentantes`
+--
+ALTER TABLE `equiposxrepresentantes`
+  ADD CONSTRAINT `fk_exr_equipo` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_exr_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `historialxpulseras`
@@ -291,13 +331,6 @@ ALTER TABLE `historialxpulseras`
 ALTER TABLE `pulserasxequipo`
   ADD CONSTRAINT `pulserasxequipo_ibfk_1` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`),
   ADD CONSTRAINT `pulserasxequipo_ibfk_2` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`);
-
---
--- Filtros para la tabla `pulserasxinvitados`
---
-ALTER TABLE `pulserasxinvitados`
-  ADD CONSTRAINT `pulserasxinvitados_ibfk_1` FOREIGN KEY (`pulsera_id`) REFERENCES `pulseras` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `pulserasxinvitados_ibfk_2` FOREIGN KEY (`invitado_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `pulseras_heartbeat`
