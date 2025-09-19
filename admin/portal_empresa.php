@@ -231,169 +231,99 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
                 }
             </style>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const equipoSelect = document.getElementById('equipo_id');
-                    const unassignedContainer = document.getElementById('unassigned-bracelets');
-                    const assignedContainer = document.getElementById('assigned-bracelets');
-                    const saveButton = document.getElementById('save-changes');
-                    let originalState = { unassigned: [], assigned: [] };
-                    let currentState = { unassigned: [], assigned: [] };
+            <script src="js/portal.js"></script>
 
-                    equipoSelect.addEventListener('change', loadBracelets);
+            <!-- Gestionar Responsables de Equipo -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Gestionar Responsables de Equipo</h5>
+                        <div class="mb-3">
+                            <label for="equipo_id_resps" class="form-label">Equipo</label>
+                            <select id="equipo_id_resps" class="form-select">
+                                <option value="">Seleccione un equipo</option>
+                                <?php foreach ($equipos as $eq): ?>
+                                    <option value="<?php echo $eq['id']; ?>"><?php echo htmlspecialchars($eq['nombre_equipo']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Usuarios disponibles
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="unassigned-responsables" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Responsables del equipo
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="assigned-responsables" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button id="save-resp-changes" class="btn btn-primary" disabled>Guardar cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    function loadBracelets() {
-                        const equipoId = equipoSelect.value;
-                        if (!equipoId) {
-                            clearContainers();
-                            return;
-                        }
+            <!-- Gestionar Invitados de Pulsera -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Gestionar Invitados de Pulsera</h5>
+                        <div class="mb-3">
+                            <label for="pulsera_id_inv" class="form-label">Pulsera</label>
+                            <select id="pulsera_id_inv" class="form-select">
+                                <option value="">Seleccione una pulsera</option>
+                                <?php foreach ($pulseras as $pul): ?>
+                                    <option value="<?php echo $pul['id']; ?>"><?php echo htmlspecialchars($pul['alias']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Usuarios disponibles
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="unassigned-invitados" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        Invitados de la pulsera
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="assigned-invitados" class="bracelet-container">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button id="save-inv-changes" class="btn btn-primary" disabled>Guardar cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        // Get all bracelets and their assignments
-                        fetch(`asociar_pulsera_equipo.php?equipo_id=${equipoId}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    originalState = {
-                                        unassigned: data.unassigned,
-                                        assigned: data.assigned
-                                    };
-                                    currentState = JSON.parse(JSON.stringify(originalState));
-                                    renderBracelets();
-                                }
-                            });
-                    }
-
-                    function clearContainers() {
-                        unassignedContainer.innerHTML = '';
-                        assignedContainer.innerHTML = '';
-                        saveButton.disabled = true;
-                    }
-
-                    function renderBracelets() {
-                        unassignedContainer.innerHTML = '';
-                        assignedContainer.innerHTML = '';
-
-                        currentState.unassigned.forEach(bracelet => {
-                            const div = createBraceletElement(bracelet);
-                            unassignedContainer.appendChild(div);
-                        });
-
-                        currentState.assigned.forEach(bracelet => {
-                            const div = createBraceletElement(bracelet);
-                            assignedContainer.appendChild(div);
-                        });
-
-                        checkChanges();
-                    }
-
-                    function createBraceletElement(bracelet) {
-                        const div = document.createElement('div');
-                        div.className = 'bracelet-item';
-                        div.draggable = true;
-                        div.dataset.id = bracelet.id;
-                        div.textContent = bracelet.alias;
-                        
-                        div.addEventListener('dragstart', handleDragStart);
-                        div.addEventListener('dragend', handleDragEnd);
-                        return div;
-                    }
-
-                    function handleDragStart(e) {
-                        e.target.style.opacity = '0.4';
-                        e.dataTransfer.setData('text/plain', e.target.dataset.id);
-                    }
-
-                    function handleDragEnd(e) {
-                        e.target.style.opacity = '1';
-                    }
-
-                    [unassignedContainer, assignedContainer].forEach(container => {
-                        container.addEventListener('dragover', e => {
-                            e.preventDefault();
-                            container.classList.add('dragover');
-                        });
-
-                        container.addEventListener('dragleave', e => {
-                            container.classList.remove('dragover');
-                        });
-
-                        container.addEventListener('drop', e => {
-                            e.preventDefault();
-                            container.classList.remove('dragover');
-                            
-                            const braceletId = e.dataTransfer.getData('text/plain');
-                            const braceletElement = document.querySelector(`[data-id="${braceletId}"]`);
-                            
-                            if (braceletElement) {
-                                const fromAssigned = braceletElement.parentElement === assignedContainer;
-                                const toAssigned = container === assignedContainer;
-                                
-                                if (fromAssigned !== toAssigned) {
-                                    const bracelet = fromAssigned 
-                                        ? currentState.assigned.find(b => b.id === parseInt(braceletId))
-                                        : currentState.unassigned.find(b => b.id === parseInt(braceletId));
-
-                                    if (bracelet) {
-                                        if (fromAssigned) {
-                                            currentState.assigned = currentState.assigned.filter(b => b.id !== bracelet.id);
-                                            currentState.unassigned.push(bracelet);
-                                        } else {
-                                            currentState.unassigned = currentState.unassigned.filter(b => b.id !== bracelet.id);
-                                            currentState.assigned.push(bracelet);
-                                        }
-                                        
-                                        currentState.unassigned.sort((a, b) => a.alias.localeCompare(b.alias));
-                                        currentState.assigned.sort((a, b) => a.alias.localeCompare(b.alias));
-                                        
-                                        renderBracelets();
-                                    }
-                                }
-                            }
-                        });
-                    });
-
-                    function checkChanges() {
-                        const hasChanges = 
-                            JSON.stringify(originalState.unassigned.map(b => b.id).sort()) !== 
-                            JSON.stringify(currentState.unassigned.map(b => b.id).sort());
-                        
-                        saveButton.disabled = !hasChanges;
-                    }
-
-                    saveButton.addEventListener('click', () => {
-                        const equipoId = equipoSelect.value;
-                        if (!equipoId) return;
-
-                        const changes = {
-                            equipo_id: equipoId,
-                            assigned: currentState.assigned.map(b => b.id)
-                        };
-
-                        fetch('asociar_pulsera_equipo.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(changes)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Cambios guardados correctamente');
-                                originalState = JSON.parse(JSON.stringify(currentState));
-                                checkChanges();
-                            } else {
-                                alert('Error al guardar los cambios');
-                            }
-                        })
-                        .catch(() => {
-                            alert('Error al guardar los cambios');
-                        });
-                    });
-                });
-            </script>
-
+             <!-- Editar Alias de Pulsera -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
@@ -419,167 +349,6 @@ $invitaciones = $pdo->query('SELECT i.id, p.alias, u.nombre FROM pulserasxinvita
                 </div>
             </div>
 
-            <div class="col-md-6">
-            <div class="card h-100">
-            <div class="card-body">
-            <h5 class="card-title">Gestionar Responsables de Equipo</h5>
-
-            <!-- Formulario para agregar -->
-            <form method="POST" class="mb-3">
-            <input type="hidden" name="action" value="resp_multi_add">
-            <div class="mb-3">
-            <label for="equipo_id_resps" class="form-label">Equipo</label>
-            <select id="equipo_id_resps" name="equipo_id_resps" class="form-select" required>
-            <option value="">Seleccione un equipo</option>
-            <?php foreach ($equipos as $eq): ?>
-            <option value="<?php echo $eq['id']; ?>">
-            <?php echo htmlspecialchars($eq['nombre_equipo']); ?>
-            </option>
-            <?php endforeach; ?>
-            </select>
-            </div>
-            <div class="mb-3">
-            <label for="usuario_id_resp_add" class="form-label">Nuevo Responsable</label>
-            <select id="usuario_id_resp_add" name="usuario_id_resp_add" class="form-select" required>
-            <option value="">Seleccione un usuario</option>
-            <?php foreach ($usuarios as $us): ?>
-            <option value="<?php echo $us['id']; ?>">
-            <?php echo htmlspecialchars($us['nombre']); ?>
-            </option>
-            <?php endforeach; ?>
-            </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Responsable</button>
-            </form>
-
-            <!-- Selector para ver responsables actuales del equipo elegido (GET) -->
-            <form method="GET" class="mb-3">
-            <div class="mb-3">
-            <label for="equipo_id_resps" class="form-label">Ver responsables de:</label>
-            <select id="equipo_id_resps" name="equipo_id_resps" class="form-select" required>
-            <option value="">Seleccione un equipo</option>
-            <?php foreach ($equipos as $eq): ?>
-            <option value="<?php echo $eq['id']; ?>"
-            <?php echo (!empty($_GET['equipo_id_resps']) && (int)$_GET['equipo_id_resps'] === (int)$eq['id']) ? 'selected' : '' ; ?>>
-            <?php echo htmlspecialchars($eq['nombre_equipo']); ?>
-            </option>
-            <?php endforeach; ?>
-            </select>
-            </div>
-            <button type="submit" class="btn btn-outline-secondary">Mostrar</button>
-            </form>
-
-            <!-- Listado de responsables actuales usando equiposxrepresentantes -->
-            <?php
-            $responsables = [];
-            $equipo_id_sel = null;
-
-            if (!empty($_GET['equipo_id_resps'])) {
-                $equipo_id_sel = (int)$_GET['equipo_id_resps'];
-                $sql = "SELECT u.id, u.nombre
-                        FROM equiposxrepresentantes exr
-                        JOIN usuarios u ON exr.usuario_id = u.id
-                        WHERE exr.equipo_id = ?
-                        ORDER BY u.nombre";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([$equipo_id_sel]);
-                $responsables = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            }
-            ?>
-
-            <?php if (!empty($equipo_id_sel) && !empty($responsables)): ?>
-            <table class="table table-sm">
-            <thead>
-            <tr>
-            <th>Responsable</th>
-            <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($responsables as $resp): ?>
-            <tr>
-            <td><?php echo htmlspecialchars($resp['nombre']); ?></td>
-            <td>
-            <form method="POST" style="display:inline;">
-            <input type="hidden" name="action" value="resp_multi_del">
-            <input type="hidden" name="equipo_id_resps" value="<?php echo $equipo_id_sel; ?>">
-            <input type="hidden" name="usuario_id_resp_del" value="<?php echo $resp['id']; ?>">
-            <button type="submit" class="btn btn-sm btn-danger">Quitar</button>
-            </form>
-            </td>
-            </tr>
-            <?php endforeach; ?>
-            </tbody>
-            </table>
-            <?php elseif (!empty($equipo_id_sel)): ?>
-            <p class="text-muted">Este equipo no tiene responsables cargados.</p>
-            <?php else: ?>
-            <p class="text-muted">Seleccione un equipo y presione “Mostrar”.</p>
-            <?php endif; ?>
-            </div>
-            </div>
-            </div>
-
-
-
-
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Gestionar Invitados de Pulsera</h5>
-                        <form method="POST" class="mb-3">
-                            <input type="hidden" name="action" value="invitar">
-                            <div class="mb-3">
-                                <label for="pulsera_id_inv" class="form-label">Pulsera</label>
-                                <select id="pulsera_id_inv" name="pulsera_id_inv" class="form-select" required>
-                                    <option value="">Seleccione una pulsera</option>
-                                    <?php foreach ($pulseras as $pul): ?>
-                                        <option value="<?php echo $pul['id']; ?>"><?php echo htmlspecialchars($pul['alias']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="usuario_id_inv" class="form-label">Usuario</label>
-                                <select id="usuario_id_inv" name="usuario_id_inv" class="form-select" required>
-                                    <option value="">Seleccione un usuario</option>
-                                    <?php foreach ($usuarios as $us): ?>
-                                        <option value="<?php echo $us['id']; ?>"><?php echo htmlspecialchars($us['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Invitar Usuario</button>
-                        </form>
-                        <?php if (!empty($invitaciones)): ?>
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Pulsera</th>
-                                        <th>Usuario</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($invitaciones as $inv): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($inv['alias']); ?></td>
-                                            <td><?php echo htmlspecialchars($inv['nombre']); ?></td>
-                                            <td>
-                                                <form method="POST" style="display:inline;">
-                                                    <input type="hidden" name="action" value="eliminar_invitado">
-                                                    <input type="hidden" name="invite_id" value="<?php echo $inv['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        <?php else: ?>
-                            <p class="text-muted">No hay invitaciones registradas.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </body>
